@@ -13,8 +13,10 @@ func Start(profil string) error {
 	envFile := ".env"
 	if profil == "dev" {
 		envFile = ".env.development"
+		log.SetLevel(log.LevelDebug)
 	} else if profil == "prod" {
 		envFile = ".env.production"
+		log.SetLevel(log.LevelInfo)
 	}
 
 	err := godotenv.Load(envFile)
@@ -28,8 +30,6 @@ func Start(profil string) error {
 		ServerHeader:  "GO-AUTH-BACKEND",
 		AppName:       os.Getenv("APP_NAME"),
 	})
-
-	log.SetLevel(log.LevelInfo)
 
 	app.Get("/", func(c fiber.Ctx) error {
 		log.Debug("dazdza")

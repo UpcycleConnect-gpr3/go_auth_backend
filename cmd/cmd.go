@@ -21,7 +21,7 @@ func Cmd() {
 	switch os.Args[1] {
 	case "serve":
 		serveCmd.Parse(os.Args[2:])
-		if err := server.Start(); err != nil {
+		if err := server.Start("dev"); err != nil {
 			log.Fatalf("Erreur lors du démarrage du serveur : %v", err)
 		}
 	case "start":

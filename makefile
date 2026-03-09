@@ -1,6 +1,9 @@
 MAIN_FILE	=main.go
 BINARY_NAME =go_auth_backend
-BUILD_DIR	= build
+BUILD_DIR	=build
+
+serve:
+	@go run $(MAIN_FILE) serve
 
 build:
 	@mkdir -p $(BUILD_DIR)

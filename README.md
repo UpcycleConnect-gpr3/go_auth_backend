@@ -1,0 +1,95 @@
+# Go Auth Backend — UpcycleConnect
+
+API d'authentification développée en Go pour le projet UpcycleConnect.
+
+---
+
+## Prérequis
+
+- [Go](https://golang.org/dl/) **1.21+**
+- [Docker](https://www.docker.com/) & **Docker Compose** (pour la base de données)
+
+Vérifiez votre installation :
+
+```bash
+go version
+docker -v
+```
+
+---
+
+## Démarrage
+
+### 1. Cloner le dépôt
+
+```bash
+git clone https://github.com/UpcycleConnect-gpr3/go_auth_backend.git
+cd go_auth_backend
+```
+
+### 2. Configurer les variables d'environnement
+
+```bash
+cp example.env .env.development
+```
+
+Éditez le fichier `.env` avec vos valeurs.
+
+### 3. Lancer la base de données
+
+```bash
+docker-compose up -d
+```
+
+### 4. Installer les dépendances Go
+
+```bash
+go mod tidy
+```
+
+### 5. Démarrer le serveur
+
+```bash
+go run main.go serve
+```
+---
+
+---
+
+## Commandes disponibles
+
+### Via Go
+
+| Commande | Description |
+|---|---|
+| `go run main.go serve` | Démarre le serveur API |
+| `go mod tidy` | Installe/nettoie les dépendances |
+| `go build -o api .` | Compile le binaire |
+| `go test ./...` | Lance les tests |
+
+
+### Via Docker Compose
+
+```bash
+docker-compose up -d      # Démarre les services (DB...)
+docker-compose down       # Arrête les services
+docker-compose logs -f    # Affiche les logs
+```
+---
+
+## Variables d'environnement
+
+Copiez `example.env` vers `.env` et renseignez les valeurs. Exemple de variables attendues :
+
+
+
+> Consultez `example.env` pour la liste complète des variables requises.
+
+---
+
+## Contribution
+
+1. Créez une branche : `git checkout -b feat/ma-feature`
+2. Committez : `git commit -m "feat: description"`
+3. Pushez : `git push origin feat/ma-feature`
+4. Ouvrez une Pull Request

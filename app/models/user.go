@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -11,4 +12,13 @@ type User struct {
 	Lastname  string    `json:"lastname"`
 	password  string    `db:"password" json:"-"`
 	Email     string    `json:"email"`
+}
+
+func (u *User) Password(password string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.password = string(hashedPassword)
+	return nil
 }

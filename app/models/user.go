@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -12,6 +14,8 @@ type User struct {
 	Lastname  string    `json:"lastname"`
 	password  string    `db:"password" json:"-"`
 	Email     string    `json:"email"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 func (u *User) Password(password string) error {

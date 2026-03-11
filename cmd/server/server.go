@@ -24,6 +24,22 @@ func Start(profile string) error {
 		log.Fatalf("Erreur lors du chargement du fichier %s : %v", envFile, err)
 	}
 
+	switch os.Getenv("APP_DEBUG") {
+	case "true":
+		log.SetLevel(log.LevelDebug)
+	case "false":
+		log.SetLevel(log.LevelInfo)
+	}
+
+	// Config Initialization
+	config.InitDatabase()
+
+	err = config.DatabaseAuth.Ping()
+
+	if err != nil {
+		log.Fatalf("(DATABASE) %v", err)
+	}
+
 	app := fiber.New(fiber.Config{
 		CaseSensitive: true,
 		StrictRouting: true,

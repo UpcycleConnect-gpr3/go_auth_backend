@@ -11,12 +11,12 @@ import (
 func Start(profil string) error {
 
 	envFile := ".env"
-	if profil == "dev" {
+
+	switch profile {
+	case "dev":
 		envFile = ".env.development"
-		log.SetLevel(log.LevelDebug)
-	} else if profil == "prod" {
+	case "prod":
 		envFile = ".env.production"
-		log.SetLevel(log.LevelInfo)
 	}
 
 	err := godotenv.Load(envFile)

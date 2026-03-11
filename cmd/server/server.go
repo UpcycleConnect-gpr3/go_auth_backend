@@ -1,6 +1,7 @@
 package server
 
 import (
+	"authentication_backend/config"
 	"os"
 
 	"github.com/gofiber/fiber/v3"
@@ -8,8 +9,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Start(profil string) error {
-
+func Start(profile string) error {
 	envFile := ".env"
 
 	switch profile {

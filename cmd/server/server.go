@@ -1,6 +1,7 @@
 package server
 
 import (
+	"authentication_backend/config"
 	"os"
 
 	"github.com/gofiber/fiber/v3"
@@ -8,20 +9,35 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Start(profil string) error {
-
+func Start(profile string) error {
 	envFile := ".env"
-	if profil == "dev" {
+
+	switch profile {
+	case "dev":
 		envFile = ".env.development"
-		log.SetLevel(log.LevelDebug)
-	} else if profil == "prod" {
+	case "prod":
 		envFile = ".env.production"
-		log.SetLevel(log.LevelInfo)
 	}
 
 	err := godotenv.Load(envFile)
 	if err != nil {
 		log.Fatalf("Erreur lors du chargement du fichier %s : %v", envFile, err)
+	}
+
+	switch os.Getenv("APP_DEBUG") {
+	case "true":
+		log.SetLevel(log.LevelDebug)
+	case "false":
+		log.SetLevel(log.LevelInfo)
+	}
+
+	// Config Initialization
+	config.InitDatabase()
+
+	err = config.DatabaseAuth.Ping()
+
+	if err != nil {
+		log.Fatalf("(DATABASE) %v", err)
 	}
 
 	app := fiber.New(fiber.Config{

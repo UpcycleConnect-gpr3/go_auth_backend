@@ -21,7 +21,7 @@ func NewDatabase(user string, password string, host string, port string, dbname 
 	conn, err := sql.Open("mysql", sqlInfo)
 
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	log.Debugf("(CONFIG) Database Drive Initialized - %s", dbname)

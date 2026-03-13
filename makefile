@@ -11,6 +11,9 @@ build:
 	@go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_FILE)
 	@echo "Binaire généré : $(BUILD_DIR)/$(BINARY_NAME)"
 
+migrate:
+	@go run $(MAIN_FILE) migrate
+
 clean:
 	@echo "Nettoyage des fichiers générés..."
 	@rm -rf $(BUILD_DIR)

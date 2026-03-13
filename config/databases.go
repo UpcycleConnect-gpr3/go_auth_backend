@@ -1,16 +1,14 @@
 package config
 
 import (
+	"authentication_backend/database"
 	"authentication_backend/internal"
-	"database/sql"
 	"os"
 )
 
-var DatabaseAuth *sql.DB
-
 func InitDatabase() {
 
-	DatabaseAuth = internal.NewDatabase(
+	database.Auth = internal.NewDatabase(
 		os.Getenv("DATABASE_USERNAME"),
 		os.Getenv("DATABASE_PASSWORD"),
 		os.Getenv("DATABASE_HOST"),

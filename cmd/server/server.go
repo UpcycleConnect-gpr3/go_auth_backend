@@ -1,11 +1,13 @@
 package server
 
 import (
+	"authentication_backend/app/handlers/auth_handlers"
+	"authentication_backend/app/handlers/metric_handlers"
 	"authentication_backend/config"
 	"authentication_backend/database"
+	"net/http"
 	"os"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"github.com/joho/godotenv"
 )
@@ -34,20 +36,14 @@ func initialize() {
 	}
 }
 
-func Start() error {
+func Start() {
 
 	initialize()
 
-	app := fiber.New(fiber.Config{
-		CaseSensitive: true,
-		StrictRouting: true,
-		ServerHeader:  "GO-AUTH-BACKEND",
-		AppName:       os.Getenv("APP_NAME"),
-	})
+	http.HandleFunc("GET /health/{$}", metric_handlers.Health)
 
-	app.Get("/", func(c fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	http.HandleFunc("POST /auth/login/{$}", auth_handlers.LoginHandler)
 
-	return app.Listen(":" + os.Getenv("APP_PORT"))
+	log.Info("Listening at http://localhost:" + os.Getenv("APP_PORT"))
+	http.ListenAndServe(":"+os.Getenv("APP_PORT"), nil)
 }

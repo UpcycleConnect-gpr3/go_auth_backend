@@ -5,8 +5,6 @@ import (
 	"authentication_backend/cmd/server"
 	"fmt"
 	"os"
-
-	"github.com/gofiber/fiber/v3/log"
 )
 
 func Cmd() {
@@ -18,9 +16,7 @@ func Cmd() {
 
 	switch os.Args[1] {
 	case "serve":
-		if err := server.Start(); err != nil {
-			log.Fatalf("Erreur lors du démarrage du serveur : %v", err)
-		}
+		server.Start()
 
 	case "migrate":
 		database.Migrate()

@@ -15,28 +15,28 @@ type TokenResponse struct {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var creds user_models.Credentials
-	err := json.NewDecoder(r.Body).Decode(&creds)
 
 	log.Api(r)
 
-	existing, err := user_models.GetUserByEmail(creds.Email)
+	var credentials user_models.Credentials
+	err := json.NewDecoder(r.Body).Decode(&credentials)
 
 	if err != nil {
 		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrJson, nil)
 		return
 	}
 
-	isCorrectPassword := existing.CheckPassword(creds.Password)
+	validationErrors, existing := user_actions.Login(credentials)
 
-	if !isCorrectPassword || creds.Email != existing.Email {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	if len(validationErrors) > 0 {
+		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrInvalidBody, validationErrors)
 		return
 	}
 
 	token, err := jwt.GenerateJWT(existing.Id.String())
 	if err != nil {
-		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrInvalidBody, nil)
+		log.ApiCodeStatus(w, http.StatusInternalServerError, log.ErrGenerateToken, nil)
+		return
 	}
 
 	tokenResponse := TokenResponse{BearerToken: token}
@@ -44,10 +44,36 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", encodedToken)
 }
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO : Write Logout handler with user_actions
-}
-
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	user_actions.CreateUser(w, r)
+
+	log.Api(r)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var userDto user_models.Credentials
+
+	err := json.NewDecoder(r.Body).Decode(&userDto)
+
+	if err != nil {
+		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrInvalidBody, nil)
+	}
+
+	validationErrors := user_actions.CreateUser(userDto)
+
+	if len(validationErrors) > 0 {
+		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrInvalidBody, validationErrors)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	/*	token, err := jwt.GenerateJWT(existing.Id.String())
+		if err != nil {
+			http.Error(w, "Error generating token", http.StatusInternalServerError)
+			return
+		}
+
+		tokenResponse := TokenResponse{BearerToken: token}
+		encodedToken, _ := json.Marshal(tokenResponse)
+		fmt.Fprintf(w, "%s", encodedToken)*/
 }

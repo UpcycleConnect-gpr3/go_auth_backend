@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/gofiber/fiber/v3/log"
 	"github.com/golang-jwt/jwt/v5"
 )
 

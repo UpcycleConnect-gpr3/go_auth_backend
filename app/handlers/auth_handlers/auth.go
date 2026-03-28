@@ -4,6 +4,7 @@ import (
 	"authentication_backend/app/actions/user_actions"
 	"authentication_backend/app/models/user_models"
 	"authentication_backend/utils/jwt"
+	"authentication_backend/utils/log"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,15 +18,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var creds user_models.Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
 
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
+	log.Api(r)
 
 	existing, err := user_models.GetUserByEmail(creds.Email)
 
 	if err != nil {
-		http.Error(w, "Error requesting user_actions by username", http.StatusInternalServerError)
+		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrJson, nil)
 		return
 	}
 
@@ -38,8 +36,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := jwt.GenerateJWT(existing.Id.String())
 	if err != nil {
-		http.Error(w, "Error generating token", http.StatusInternalServerError)
-		return
+		log.ApiCodeStatus(w, http.StatusBadRequest, log.ErrInvalidBody, nil)
 	}
 
 	tokenResponse := TokenResponse{BearerToken: token}

@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"authentication_backend/utils/log"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -21,41 +22,41 @@ var (
 func init() {
 	privateKeyPEM, err := os.ReadFile("private_key.pem")
 	if err != nil {
-		log.Fatalf("Failed to read private key: %v", err)
+		log.Fatal(err)
 	}
 	block, _ := pem.Decode(privateKeyPEM)
 	if block == nil {
-		log.Fatal("Failed to decode PEM block containing the private key")
+		log.Info("Failed to decode PEM block containing the private key")
 	}
 
 	privateKeyAny, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		log.Fatalf("Failed to parse private key (PKCS#8): %v", err)
+		log.Fatal(err)
 	}
 
 	var ok bool
 	privateKey, ok = privateKeyAny.(*rsa.PrivateKey)
 	if !ok {
-		log.Fatal("Private key is not an RSA key")
+		log.Info("Private key is not an RSA key")
 	}
 
 	publicKeyPEM, err := os.ReadFile("public_key.pem")
 	if err != nil {
-		log.Fatalf("Failed to read public key: %v", err)
+		log.Fatal(err)
 	}
 	block, _ = pem.Decode(publicKeyPEM)
 	if block == nil {
-		log.Fatal("Failed to decode PEM block containing the public key")
+		log.Info("Failed to decode PEM block containing the public key")
 	}
 
 	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		log.Fatalf("Failed to parse public key (PKIX): %v", err)
+		log.Fatal(err)
 	}
 
 	publicKey, ok = publicKeyInterface.(*rsa.PublicKey)
 	if !ok {
-		log.Fatal("Public key is not an RSA key")
+		log.Info("Public key is not an RSA key")
 	}
 }
 

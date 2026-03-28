@@ -1,12 +1,11 @@
 package internal
 
 import (
+	"authentication_backend/utils/log"
 	"database/sql"
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/gofiber/fiber/v3/log"
 )
 
 const MigrationsPath = "database/migrations/"
@@ -56,7 +55,7 @@ func CreateTableMigrations(db *sql.DB) {
 		log.Fatal(errorToCreateMigrationTable)
 	}
 
-	log.Debug("Migration Table Ready")
+	log.Info("Migration Table Ready")
 }
 
 func ShowStagingMigrations(migrations []string) {

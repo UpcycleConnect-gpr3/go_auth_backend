@@ -1,19 +1,19 @@
 package internal
 
 import (
+	"authentication_backend/utils/log"
 	"database/sql"
 	"fmt"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gofiber/fiber/v3/log"
 )
 
 func NewDatabase(user string, password string, host string, port string, dbname string) *sql.DB {
 	var intPort, errorToConvert = strconv.Atoi(port)
 
 	if errorToConvert != nil {
-		log.Fatal("Error converting port to int")
+		log.Fatal(errorToConvert)
 	}
 
 	var sqlInfo = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", user, password, host, intPort, dbname)
@@ -21,10 +21,10 @@ func NewDatabase(user string, password string, host string, port string, dbname 
 	conn, err := sql.Open("mysql", sqlInfo)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 
-	log.Debugf("(CONFIG) Database Drive Initialized - %s", dbname)
+	log.Info(fmt.Sprintf("(CONFIG) Database Drive Initialized %s", dbname))
 
 	return conn
 }

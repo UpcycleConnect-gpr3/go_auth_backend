@@ -94,6 +94,10 @@ Copiez `example.env` vers `.env` et renseignez les valeurs. Exemple de variables
 3. Pushez : `git push origin feat/ma-feature`
 4. Ouvrez une Pull Request
 
+
+openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
+openssl pkey -in private_key.pem -pubout -out public_key.pem
+
 ## Template
 
 ### Actions

@@ -41,7 +41,7 @@ func (u *User) CheckPassword(password string) bool {
 	return err == nil
 }
 
-func GetUserByEmail(email string) (*User, error) {
+func GetUserByEmail(email string) *User {
 	user := User{}
 	action := fmt.Sprintf("SELECT USER WHERE USERNAME : %s", email)
 
@@ -51,19 +51,21 @@ func GetUserByEmail(email string) (*User, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil
 		}
-		return nil, log.DatabaseError(action, err)
+		log.Database(action, err)
+		return nil
 	}
 
 	if err = row.Err(); err != nil {
-		return nil, log.DatabaseError(action, err)
+		log.Database(action, err)
+		return nil
 	}
 
-	return &user, nil
+	return &user
 }
 
-func CreateUser(user Credentials) error {
+func CreateUser(user Credentials) {
 	action := fmt.Sprintf("INSERT INTO USERS : %s", user.Email)
 
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -71,8 +73,6 @@ func CreateUser(user Credentials) error {
 	_, err := database.Auth.Exec("INSERT INTO USERS (id, email, password) VALUES (?, ?, ?)", "9c0a671f-53b3-4436-b32c-e140d7ddae00", user.Email, hashed)
 
 	if err != nil {
-		return log.DatabaseError(action, err)
+		log.Database(action, err)
 	}
-
-	return nil
 }

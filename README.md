@@ -93,3 +93,37 @@ Copiez `example.env` vers `.env` et renseignez les valeurs. Exemple de variables
 2. Committez : `git commit -m "feat: description"`
 3. Pushez : `git push origin feat/ma-feature`
 4. Ouvrez une Pull Request
+
+## Template
+
+### Actions
+
+```go
+package <model>_actions
+
+import (
+    "authentication_backend/utils/rules"
+)
+
+func <action>Validate<Model>(<model>Dto <model>_models.<ModelUse>) []rules.ValidationError {
+	var errs []rules.ValidationError
+
+	rules.<Rule>(<model>Dto.<Attribute>, 5, "<attribute>", &errs)
+
+	return errs
+}
+
+func <Action><Model>(<model>Dto <model>_models.<ModelUse>) []rules.ValidationError {
+
+	validationError := <action>Validate<Model>(<model>Dto)
+
+	if len(validationError) > 0 {
+		return validationError
+	}
+
+	<model>_models.<Action><Model>(<model>Dto)
+
+	return nil
+}
+
+```

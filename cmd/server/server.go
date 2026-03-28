@@ -7,8 +7,8 @@ import (
 	"authentication_backend/database"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/gofiber/fiber/v3/log"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	log "github.com/thedataflows/go-lib-log"
@@ -44,6 +44,7 @@ func Start() {
 	http.HandleFunc("GET /health/{$}", metric_handlers.Health)
 
 	http.HandleFunc("POST /auth/login/{$}", auth_handlers.LoginHandler)
+	http.HandleFunc("POST /auth/register/{$}", auth_handlers.RegisterHandler)
 
 	logger.Info().Msg("Listening at http://localhost:" + os.Getenv("APP_PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("APP_PORT"), nil)

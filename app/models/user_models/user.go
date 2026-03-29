@@ -11,6 +11,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	TABLE = "USERS"
+)
+
 type User struct {
 	Id        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`
@@ -45,7 +49,7 @@ func GetUserByEmail(email string) *User {
 	user := User{}
 	action := fmt.Sprintf("SELECT USER WHERE USERNAME : %s", email)
 
-	row := database.Auth.QueryRow("SELECT id, email, password FROM USERS WHERE email = ?", email)
+	row := database.Auth.QueryRow("SELECT id, email, password FROM "+TABLE+" WHERE email = ?", email)
 
 	err := row.Scan(&user.Id, &user.Email, &user.password)
 
@@ -66,11 +70,11 @@ func GetUserByEmail(email string) *User {
 }
 
 func CreateUser(user Credentials) {
-	action := fmt.Sprintf("INSERT INTO USERS : %s", user.Email)
+	action := fmt.Sprintf("INSERT INTO "+TABLE+" : %s", user.Email)
 
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
-	_, err := database.Auth.Exec("INSERT INTO USERS (id, email, password) VALUES (?, ?, ?)", "9c0a671f-53b3-4436-b32c-e140d7ddae00", user.Email, hashed)
+	_, err := database.Auth.Exec("INSERT INTO "+TABLE+" (id, email, password) VALUES (?, ?, ?)", "9c0a671f-53b3-4436-b32c-e140d7ddae00", user.Email, hashed)
 
 	if err != nil {
 		log.Database(action, err)

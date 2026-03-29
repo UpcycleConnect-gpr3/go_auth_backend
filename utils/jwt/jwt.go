@@ -94,17 +94,18 @@ func VerifyJWT(tokenString string) (string, error) {
 	return userId, nil
 }
 
-func Auth(w http.ResponseWriter, r *http.Request) bool {
+func Auth(w http.ResponseWriter, r *http.Request) string {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		http.Error(w, "Authorization token required", http.StatusUnauthorized)
-		return false
-	}
-	_, err := VerifyJWT(tokenString)
-	if err != nil {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
-		return false
+		log.ApiCodeStatus(w, http.StatusUnauthorized, "Authorization token required", nil)
+		return ""
 	}
 
-	return true
+	userId, err := VerifyJWT(tokenString)
+	if err != nil {
+		log.ApiCodeStatus(w, http.StatusUnauthorized, "Invalid token", nil)
+		return ""
+	}
+
+	return userId
 }

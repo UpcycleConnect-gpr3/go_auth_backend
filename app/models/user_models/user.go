@@ -47,7 +47,7 @@ func (u *User) CheckPassword(password string) bool {
 
 func GetUserByEmail(email string) *User {
 	user := User{}
-	action := fmt.Sprintf("SELECT USER WHERE USERNAME : %s", email)
+	action := fmt.Sprintf("SELECT "+TABLE+" WHERE email : %s", email)
 
 	row := database.Auth.QueryRow("SELECT id, email, password FROM "+TABLE+" WHERE email = ?", email)
 

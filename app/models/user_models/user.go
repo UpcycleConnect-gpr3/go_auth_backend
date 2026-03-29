@@ -74,7 +74,7 @@ func CreateUser(user Credentials) {
 
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
-	_, err := database.Auth.Exec("INSERT INTO "+TABLE+" (id, email, password) VALUES (?, ?, ?)", "9c0a671f-53b3-4436-b32c-e140d7ddae00", user.Email, hashed)
+	_, err := database.Auth.Exec("INSERT INTO "+TABLE+" (id, email, password) VALUES (?, ?, ?)", uuid.New().String(), user.Email, hashed)
 
 	if err != nil {
 		log.Database(action, err)

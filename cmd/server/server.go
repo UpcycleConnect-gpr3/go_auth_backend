@@ -3,6 +3,7 @@ package server
 import (
 	"authentication_backend/app/handlers/auth_handlers"
 	"authentication_backend/app/handlers/metric_handlers"
+	"authentication_backend/app/middleware/source_middleware"
 	"authentication_backend/config"
 	"authentication_backend/database"
 	"net/http"
@@ -41,7 +42,7 @@ func Start() {
 	logger := log.NewLoggerBuilder().WithLogLevel(zerolog.DebugLevel).WithBufferSize(10000).WithRateLimit(1000).WithGroupWindow(2 * time.Second).WithOutput(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).Build()
 	defer logger.Close()
 
-	http.HandleFunc("GET /health/{$}", metric_handlers.Health)
+	http.HandleFunc("GET /health/{$}", source_middleware.Container("test")(metric_handlers.Health))
 
 	http.HandleFunc("POST /auth/login/{$}", auth_handlers.LoginHandler)
 	http.HandleFunc("POST /auth/register/{$}", auth_handlers.RegisterHandler)

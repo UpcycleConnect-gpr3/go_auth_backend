@@ -1,27 +1,28 @@
 package server
 
 import (
+	"authentication_backend/app/handlers/auth_handlers"
+	"authentication_backend/app/handlers/metric_handlers"
+	"authentication_backend/app/middleware/source_middleware"
 	"authentication_backend/config"
 	"authentication_backend/database"
+	"net/http"
 	"os"
+	"time"
 
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/log"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	log "github.com/thedataflows/go-lib-log"
 )
 
 func initialize() {
 
+	logger := log.NewLoggerBuilder().WithLogLevel(zerolog.DebugLevel).WithBufferSize(10000).WithRateLimit(1000).WithGroupWindow(2 * time.Second).WithLogFormat(log.LOG_FORMAT_JSON).WithOutput(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).Build()
+	defer logger.Close()
+
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Erreur lors du chargement du fichier .env : %v", err)
-	}
-
-	switch os.Getenv("APP_DEBUG") {
-	case "true":
-		log.SetLevel(log.LevelDebug)
-	case "false":
-		log.SetLevel(log.LevelInfo)
+		logger.Fatal().Err(err).Msg("Error loading .env file")
 	}
 
 	// Config Initialization
@@ -30,24 +31,25 @@ func initialize() {
 	err = database.Auth.Ping()
 
 	if err != nil {
-		log.Fatalf("(DATABASE) %v", err)
+		logger.Fatal().Err(err).Msg("(DATABASE)")
 	}
 }
 
-func Start() error {
+func Start() {
 
 	initialize()
 
-	app := fiber.New(fiber.Config{
-		CaseSensitive: true,
-		StrictRouting: true,
-		ServerHeader:  "GO-AUTH-BACKEND",
-		AppName:       os.Getenv("APP_NAME"),
-	})
+	logger := log.NewLoggerBuilder().WithLogLevel(zerolog.DebugLevel).WithBufferSize(10000).WithRateLimit(1000).WithGroupWindow(2 * time.Second).WithOutput(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).Build()
+	defer logger.Close()
 
-	app.Get("/", func(c fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	http.HandleFunc("GET /health/{$}", source_middleware.Container("test")(metric_handlers.Health))
 
-	return app.Listen(":" + os.Getenv("APP_PORT"))
+	http.HandleFunc("POST /auth/login/{$}", auth_handlers.LoginHandler)
+	http.HandleFunc("POST /auth/register/{$}", auth_handlers.RegisterHandler)
+
+	logger.Info().Msg("Listening at http://localhost:" + os.Getenv("APP_PORT"))
+	err := http.ListenAndServe(":"+os.Getenv("APP_PORT"), nil)
+	if err != nil {
+		return
+	}
 }

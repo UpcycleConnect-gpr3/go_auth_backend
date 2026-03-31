@@ -13,7 +13,6 @@ func Container(allowedContainer string) func(http.HandlerFunc) http.HandlerFunc 
 				log.ApiCodeStatus(w, http.StatusForbidden, "", nil)
 				return
 			}
-
 			if clientContainer != allowedContainer {
 				log.ApiCodeStatus(w, http.StatusForbidden, "", nil)
 				return

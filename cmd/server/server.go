@@ -1,40 +1,55 @@
 package server
 
 import (
+	"authentication_backend/app/handlers/auth_handlers"
+	"authentication_backend/app/handlers/metric_handlers"
+	"authentication_backend/app/middleware/source_middleware"
+	"authentication_backend/config"
+	"authentication_backend/database"
+	"net/http"
 	"os"
+	"time"
 
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/log"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	log "github.com/thedataflows/go-lib-log"
 )
 
-func Start(profil string) error {
+func initialize() {
 
-	envFile := ".env"
-	if profil == "dev" {
-		envFile = ".env.development"
-		log.SetLevel(log.LevelDebug)
-	} else if profil == "prod" {
-		envFile = ".env.production"
-		log.SetLevel(log.LevelInfo)
-	}
+	logger := log.NewLoggerBuilder().WithLogLevel(zerolog.DebugLevel).WithBufferSize(10000).WithRateLimit(1000).WithGroupWindow(2 * time.Second).WithLogFormat(log.LOG_FORMAT_JSON).WithOutput(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).Build()
+	defer logger.Close()
 
-	err := godotenv.Load(envFile)
+	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Erreur lors du chargement du fichier %s : %v", envFile, err)
+		logger.Fatal().Err(err).Msg("Error loading .env file")
 	}
 
-	app := fiber.New(fiber.Config{
-		CaseSensitive: true,
-		StrictRouting: true,
-		ServerHeader:  "GO-AUTH-BACKEND",
-		AppName:       os.Getenv("APP_NAME"),
-	})
+	// Config Initialization
+	config.InitDatabase()
 
-	app.Get("/", func(c fiber.Ctx) error {
-		log.Debug("dazdza")
-		return c.SendString("Hello, World!")
-	})
+	err = database.Auth.Ping()
 
-	return app.Listen(":" + os.Getenv("APP_PORT"))
+	if err != nil {
+		logger.Fatal().Err(err).Msg("(DATABASE)")
+	}
+}
+
+func Start() {
+
+	initialize()
+
+	logger := log.NewLoggerBuilder().WithLogLevel(zerolog.DebugLevel).WithBufferSize(10000).WithRateLimit(1000).WithGroupWindow(2 * time.Second).WithOutput(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).Build()
+	defer logger.Close()
+
+	http.HandleFunc("GET /health/{$}", source_middleware.Container("test")(metric_handlers.Health))
+
+	http.HandleFunc("POST /auth/login/{$}", auth_handlers.LoginHandler)
+	http.HandleFunc("POST /auth/register/{$}", auth_handlers.RegisterHandler)
+
+	logger.Info().Msg("Listening at http://localhost:" + os.Getenv("APP_PORT"))
+	err := http.ListenAndServe(":"+os.Getenv("APP_PORT"), nil)
+	if err != nil {
+		return
+	}
 }

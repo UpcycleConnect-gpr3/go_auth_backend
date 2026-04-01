@@ -2,6 +2,12 @@
 
 API d'authentification développée en Go pour le projet UpcycleConnect.
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=UpcycleConnect-gpr3_go_auth_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=UpcycleConnect-gpr3_go_auth_backend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=UpcycleConnect-gpr3_go_auth_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=UpcycleConnect-gpr3_go_auth_backend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=UpcycleConnect-gpr3_go_auth_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=UpcycleConnect-gpr3_go_auth_backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=UpcycleConnect-gpr3_go_auth_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=UpcycleConnect-gpr3_go_auth_backend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=UpcycleConnect-gpr3_go_auth_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=UpcycleConnect-gpr3_go_auth_backend)
+
 ---
 
 ## Prérequis

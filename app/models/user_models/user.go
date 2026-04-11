@@ -22,7 +22,7 @@ type User struct {
 	Lastname    string    `json:"lastname"`
 	password    string    `db:"password" json:"-"`
 	Email       string    `json:"email"`
-	TOTPSecret  string    `json:"-"` // Secret TOTP (base32)
+	TOTPSecret  string    `json:"-"`
 	TOTPEnabled bool      `json:"totp_enabled"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`

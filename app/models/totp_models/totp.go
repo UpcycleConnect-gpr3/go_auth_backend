@@ -15,3 +15,7 @@ type TOTPSecretResponse struct {
 	Secret string `json:"secret"`
 	URI    string `json:"uri"`
 }
+
+type TOTPCodeRequest struct {
+	Code string `json:"code"`
+}

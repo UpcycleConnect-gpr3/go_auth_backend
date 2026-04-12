@@ -10,83 +10,90 @@ type ValidationError struct {
 	Message string `json:"message"`
 }
 
-func StringMinLength(value string, min int, attribut string, errs *[]ValidationError) {
+func StringMinLength(value string, min int, attribute string, errs *[]ValidationError) {
 	if len(value) < min {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s length must be at least %d", attribut, min),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s length must be at least %d", attribute, min),
 		})
 	}
 }
 
-func StringMaxLength(value string, max int, attribut string, errs *[]ValidationError) {
+func StringMaxLength(value string, max int, attribute string, errs *[]ValidationError) {
 	if len(value) > max {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s length must be less than %d", attribut, max),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s length must be less than %d", attribute, max),
 		})
 	}
 }
 
-func IntMinLength(value int, min int, attribut string, errs *[]ValidationError) {
+func IntMinLength(value int, min int, attribute string, errs *[]ValidationError) {
 	if value < min {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must be at least %d", attribut, min),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must be at least %d", attribute, min),
 		})
 	}
 }
 
-func IntMaxLength(value int, max int, attribut string, errs *[]ValidationError) {
+func IntMaxLength(value int, max int, attribute string, errs *[]ValidationError) {
 	if value > max {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must be less than %d", attribut, max),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must be less than %d", attribute, max),
 		})
 	}
 }
 
-func MustContainsAny(value string, caracters string, number int, attribut string, errs *[]ValidationError) {
-	if !strings.ContainsAny(value, caracters) {
+func MustContainsAny(value string, characters string, number int, attribute string, errs *[]ValidationError) {
+	count := 0
+	for _, char := range value {
+		if strings.ContainsRune(characters, char) {
+			count++
+			if count >= number {
+				return
+			}
+		}
+	}
+	*errs = append(*errs, ValidationError{
+		Field:   attribute,
+		Message: fmt.Sprintf("%s must contain at least %d of these chars (%s)", attribute, number, characters),
+	})
+}
+
+func MustNotContainsAny(value string, characters string, attribute string, errs *[]ValidationError) {
+	if strings.ContainsAny(value, characters) {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must contain at least %d of these chars (%s)", attribut, number, caracters),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must not contain any of these chars (%s)", attribute, characters),
 		})
 	}
 }
 
-func MustNotContainsAny(value string, caracters string, attribut string, errs *[]ValidationError) {
-	if strings.ContainsAny(value, caracters) {
-		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must not contain any of these chars (%s)", attribut, caracters),
-		})
-	}
-}
-
-func MustContains(value string, word string, attribut string, errs *[]ValidationError) {
+func MustContains(value string, word string, attribute string, errs *[]ValidationError) {
 	if !strings.Contains(value, word) {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must contain the word (%s)", attribut, word),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must contain the word (%s)", attribute, word),
 		})
 	}
 }
 
-func MustNotContains(value string, word string, attribut string, errs *[]ValidationError) {
+func MustNotContains(value string, word string, attribute string, errs *[]ValidationError) {
 	if strings.Contains(value, word) {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must not contain the forbidden word (%s)", attribut, word),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must not contain the forbidden word (%s)", attribute, word),
 		})
 	}
 }
 
-func StringStart(value string, prefix string, attribut string, errs *[]ValidationError) {
+func StringStart(value string, prefix string, attribute string, errs *[]ValidationError) {
 	if !strings.HasPrefix(value, prefix) {
 		*errs = append(*errs, ValidationError{
-			Field:   attribut,
-			Message: fmt.Sprintf("%s must be prefixed by %s", attribut, prefix),
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must be prefixed by %s", attribute, prefix),
 		})
 	}
 }

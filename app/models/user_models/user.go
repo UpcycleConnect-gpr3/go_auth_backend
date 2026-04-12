@@ -106,3 +106,14 @@ func GetUserByID(id string) *User {
 
 	return &user
 }
+
+func UpdateUserTOTP(user *User) error {
+	_, err := database.Auth.Exec(
+		"UPDATE "+TABLE+" SET totp_secret = ?, totp_enabled = ? WHERE id = ?",
+		user.TOTPSecret, user.TOTPEnabled, user.Id,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}

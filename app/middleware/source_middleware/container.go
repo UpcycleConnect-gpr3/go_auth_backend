@@ -14,7 +14,7 @@ func Container(allowedContainer string) func(http.HandlerFunc) http.HandlerFunc 
 				return
 			}
 			if clientContainer != allowedContainer {
-				log.ApiCodeStatus(w, http.StatusForbidden, "", nil)
+				response.NewErrorMessage(w, "", http.StatusForbidden)
 				return
 			}
 			next.ServeHTTP(w, r)

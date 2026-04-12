@@ -2,7 +2,7 @@ package user_actions
 
 import (
 	"authentication_backend/app/models/user_models"
-	"authentication_backend/utils/log"
+	"authentication_backend/utils/response"
 	"authentication_backend/utils/rules"
 )
 
@@ -17,7 +17,7 @@ func loginValidateCredential(userDto user_models.Credentials) ([]rules.Validatio
 	if existing == nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
-			Message: log.ErrAuthFailed,
+			Message: response.ErrAuthFailed,
 		})
 		return errs, existing
 	}
@@ -27,7 +27,7 @@ func loginValidateCredential(userDto user_models.Credentials) ([]rules.Validatio
 	if !isCorrectPassword || userDto.Email != existing.Email {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
-			Message: log.ErrAuthFailed,
+			Message: response.ErrAuthFailed,
 		})
 	}
 

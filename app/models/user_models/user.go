@@ -82,3 +82,27 @@ func CreateUser(user Credentials) {
 		log.Database(action, err)
 	}
 }
+
+func GetUserByID(id string) *User {
+	user := User{}
+	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
+
+	row := database.Auth.QueryRow("SELECT id, email FROM "+TABLE+" WHERE id = ?", id)
+
+	err := row.Scan(&user.Id, &user.Email)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		log.Database(action, err)
+		return nil
+	}
+
+	if err = row.Err(); err != nil {
+		log.Database(action, err)
+		return nil
+	}
+
+	return &user
+}

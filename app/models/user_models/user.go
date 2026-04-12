@@ -117,3 +117,27 @@ func UpdateUserTOTP(user *User) error {
 	}
 	return nil
 }
+
+func GetUserByIDWithTOTP(id string) *User {
+	user := User{}
+	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
+
+	row := database.Auth.QueryRow("SELECT id, totp_secret, totp_enabled FROM "+TABLE+" WHERE id = ?", id)
+
+	err := row.Scan(&user.Id, &user.TOTPSecret, &user.TOTPEnabled)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		log.Database(action, err)
+		return nil
+	}
+
+	if err = row.Err(); err != nil {
+		log.Database(action, err)
+		return nil
+	}
+
+	return &user
+}

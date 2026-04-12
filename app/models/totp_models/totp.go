@@ -14,12 +14,6 @@ type TOTP struct {
 	CreatedAt time.Time `json:"created_at"`
 	UserID    string    `json:"user_id"`
 }
-
-type TOTPSecretResponse struct {
-	Secret string `json:"secret"`
-	URI    string `json:"uri"`
-}
-
 type TOTPCodeRequest struct {
 	Code string `json:"code"`
 }

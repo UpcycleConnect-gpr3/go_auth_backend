@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"authentication_backend/utils/log"
+	"authentication_backend/utils/response"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -97,13 +98,13 @@ func VerifyJWT(tokenString string) (string, error) {
 func Auth(w http.ResponseWriter, r *http.Request) string {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		log.ApiCodeStatus(w, http.StatusUnauthorized, "Authorization token required", nil)
+		response.NewErrorMessage(w, response.ErrAuthTokenRequired, http.StatusUnauthorized)
 		return ""
 	}
 
 	userId, err := VerifyJWT(tokenString)
 	if err != nil {
-		log.ApiCodeStatus(w, http.StatusUnauthorized, "Invalid token", nil)
+		response.NewErrorMessage(w, response.ErrInvalidAuthToken, http.StatusUnauthorized)
 		return ""
 	}
 

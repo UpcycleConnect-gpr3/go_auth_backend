@@ -10,7 +10,7 @@ func Container(allowedContainer string) func(http.HandlerFunc) http.HandlerFunc 
 		return func(w http.ResponseWriter, r *http.Request) {
 			clientContainer := r.Header.Get("X-Container-Name")
 			if clientContainer == "" {
-				log.ApiCodeStatus(w, http.StatusForbidden, "", nil)
+				response.NewErrorMessage(w, "", http.StatusForbidden)
 				return
 			}
 			if clientContainer != allowedContainer {

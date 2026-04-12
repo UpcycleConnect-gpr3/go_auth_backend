@@ -1,5 +1,9 @@
 package totp_models
 
+import (
+	"time"
+)
+
 const (
 	TABLE = "TOTPS"
 )

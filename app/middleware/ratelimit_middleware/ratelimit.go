@@ -30,7 +30,7 @@ func (rl *RateLimiter) RateLimit(next http.HandlerFunc) http.HandlerFunc {
 
 		if count, ok := rl.visitors[ip]; ok {
 			if count >= rl.limit {
-				log.ApiCodeStatus(w, http.StatusTooManyRequests, "", nil)
+				response.NewErrorMessage(w, "Hop hop hop, on se calme", http.StatusTooManyRequests)
 				return
 			}
 			rl.visitors[ip] = count + 1

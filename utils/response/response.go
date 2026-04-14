@@ -70,17 +70,19 @@ var httpStatusTexts = map[int]string{
 }
 
 const (
-	ErrAuthFailed        = "Credentials do not match"
-	ErrInvalidBody       = "Incorrect body format"
-	ErrJson              = "Json parse error"
-	ErrGenerateToken     = "Generate token error"
-	ErrUserNotFound      = "User not found"
-	ErrInvalidTOTP       = "Invalid TOTP code"
-	ErrEnableTOTP        = "Failed to enable TOTP"
-	ErrGenerateTOTP      = "Failed to generate TOTP"
-	ErrDisableTOTP       = "Failed to disable TOTP"
-	ErrAuthTokenRequired = "Authorization token required"
-	ErrInvalidAuthToken  = "Invalid authorization token"
+	ErrAuthFailed           = "Credentials do not match"
+	ErrInvalidBody          = "Incorrect body format"
+	ErrJson                 = "Json parse error"
+	ErrGenerateToken        = "Generate token error"
+	ErrUserNotFound         = "User not found"
+	ErrInvalidTOTP          = "Invalid TOTP code"
+	ErrEnableTOTP           = "Failed to enable TOTP"
+	ErrGenerateTOTP         = "Failed to generate TOTP"
+	ErrDisableTOTP          = "Failed to disable TOTP"
+	ErrAuthTokenRequired    = "Authorization token required"
+	ErrInvalidAuthToken     = "Invalid authorization token"
+	ErrInvalidOrExpiredHash = "Invalid or expired hash"
+	ErrFetchingTOTPRecord   = "Failed to fetch TOTP record"
 )
 
 const (
@@ -125,8 +127,8 @@ func NewSuccessMessage(w http.ResponseWriter, message string) {
 	newSuccess(w, nil, message)
 }
 
-func NewSuccessData(w http.ResponseWriter, data interface{}, message string) {
-	newSuccess(w, data, message)
+func NewSuccessData(w http.ResponseWriter, data interface{}) {
+	newSuccess(w, data, "")
 }
 
 func newError(w http.ResponseWriter, statusCode int, message string, errors []rules.ValidationError) {

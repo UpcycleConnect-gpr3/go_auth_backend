@@ -4,6 +4,7 @@ import (
 	"authentication_backend/database"
 	"authentication_backend/utils/log"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,14 +17,16 @@ const (
 )
 
 type User struct {
-	Id        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Firstname string    `json:"firstname"`
-	Lastname  string    `json:"lastname"`
-	password  string    `db:"password" json:"-"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	Id          uuid.UUID `json:"id"`
+	Username    string    `json:"username"`
+	Firstname   string    `json:"firstname"`
+	Lastname    string    `json:"lastname"`
+	password    string    `db:"password" json:"-"`
+	Email       string    `json:"email"`
+	TOTPSecret  string    `db:"totp_secret" json:"-"`
+	TOTPEnabled bool      `db:"totp_enabled" json:"totp_enabled"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
 }
 
 type Credentials struct {
@@ -45,13 +48,13 @@ func (u *User) CheckPassword(password string) bool {
 	return err == nil
 }
 
-func GetUserByEmail(email string) *User {
+func GetUserByEmailAuth(email string) *User {
 	user := User{}
 	action := fmt.Sprintf("SELECT "+TABLE+" WHERE email : %s", email)
 
-	row := database.Auth.QueryRow("SELECT id, email, password FROM "+TABLE+" WHERE email = ?", email)
+	row := database.Auth.QueryRow("SELECT id, email, password, totp_enabled FROM "+TABLE+" WHERE email = ?", email)
 
-	err := row.Scan(&user.Id, &user.Email, &user.password)
+	err := row.Scan(&user.Id, &user.Email, &user.password, &user.TOTPEnabled)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -79,4 +82,63 @@ func CreateUser(user Credentials) {
 	if err != nil {
 		log.Database(action, err)
 	}
+}
+
+func GetUserByID(id string) *User {
+	user := User{}
+	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
+
+	row := database.Auth.QueryRow("SELECT id, email, totp_secret FROM "+TABLE+" WHERE id = ?", id)
+
+	err := row.Scan(&user.Id, &user.Email, &user.TOTPSecret)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+		log.Database(action, err)
+		return nil
+	}
+
+	if err = row.Err(); err != nil {
+		log.Database(action, err)
+		return nil
+	}
+
+	return &user
+}
+
+func UpdateUserTOTP(user *User) error {
+	_, err := database.Auth.Exec(
+		"UPDATE "+TABLE+" SET totp_secret = ?, totp_enabled = ? WHERE id = ?",
+		user.TOTPSecret, user.TOTPEnabled, user.Id,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetUserByIDWithTOTP(id string) *User {
+	user := User{}
+	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
+
+	row := database.Auth.QueryRow("SELECT id, totp_secret, totp_enabled FROM "+TABLE+" WHERE id = ?", id)
+
+	err := row.Scan(&user.Id, &user.TOTPSecret, &user.TOTPEnabled)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+		log.Database(action, err)
+		return nil
+	}
+
+	if err = row.Err(); err != nil {
+		log.Database(action, err)
+		return nil
+	}
+
+	return &user
 }

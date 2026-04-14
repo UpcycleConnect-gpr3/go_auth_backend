@@ -3,6 +3,7 @@ package server
 import (
 	"authentication_backend/app/handlers/auth_handlers"
 	"authentication_backend/app/handlers/metric_handlers"
+	"authentication_backend/app/handlers/totp_handlers"
 	"authentication_backend/app/middleware/ratelimit_middleware"
 	"authentication_backend/app/middleware/source_middleware"
 	"authentication_backend/config"
@@ -52,7 +53,11 @@ func Start() {
 	http.HandleFunc("GET /health/{$}", limiterLow.RateLimit(containerTest(metric_handlers.Health)))
 
 	http.HandleFunc("POST /auth/login/{$}", limiterLow.RateLimit(auth_handlers.LoginHandler))
+	http.HandleFunc("POST /auth/login-totp/{$}", limiterLow.RateLimit(auth_handlers.ValidateTOTPHandler))
 	http.HandleFunc("POST /auth/register/{$}", limiterLow.RateLimit(auth_handlers.RegisterHandler))
+
+	http.HandleFunc("POST /user/{userId}/totp/{$}", totp_handlers.PostTOTP)
+	http.HandleFunc("GET /user/{userId}/totp/{$}", totp_handlers.GetTOTP)
 
 	logger.Info().Msg("Listening at http://localhost:" + os.Getenv("APP_PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("APP_PORT"), nil)

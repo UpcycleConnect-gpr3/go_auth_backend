@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"authentication_backend/utils/log"
+	"authentication_backend/utils/response"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -14,8 +15,8 @@ import (
 )
 
 var (
-	privateKey *rsa.PrivateKey
-	publicKey  *rsa.PublicKey
+	PrivateKey *rsa.PrivateKey
+	PublicKey  *rsa.PublicKey
 )
 
 func init() {
@@ -34,7 +35,7 @@ func init() {
 	}
 
 	var ok bool
-	privateKey, ok = privateKeyAny.(*rsa.PrivateKey)
+	PrivateKey, ok = privateKeyAny.(*rsa.PrivateKey)
 	if !ok {
 		log.Info("Private key is not an RSA key")
 	}
@@ -53,7 +54,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	publicKey, ok = publicKeyInterface.(*rsa.PublicKey)
+	PublicKey, ok = publicKeyInterface.(*rsa.PublicKey)
 	if !ok {
 		log.Info("Public key is not an RSA key")
 	}
@@ -68,7 +69,7 @@ func GenerateJWT(userId string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	return token.SignedString(privateKey)
+	return token.SignedString(PrivateKey)
 }
 
 func VerifyJWT(tokenString string) (string, error) {
@@ -76,7 +77,7 @@ func VerifyJWT(tokenString string) (string, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return publicKey, nil
+		return PublicKey, nil
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to parse token: %w", err)
@@ -97,13 +98,13 @@ func VerifyJWT(tokenString string) (string, error) {
 func Auth(w http.ResponseWriter, r *http.Request) string {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		log.ApiCodeStatus(w, http.StatusUnauthorized, "Authorization token required", nil)
+		response.NewErrorMessage(w, response.ErrAuthTokenRequired, http.StatusUnauthorized)
 		return ""
 	}
 
 	userId, err := VerifyJWT(tokenString)
 	if err != nil {
-		log.ApiCodeStatus(w, http.StatusUnauthorized, "Invalid token", nil)
+		response.NewErrorMessage(w, response.ErrInvalidAuthToken, http.StatusUnauthorized)
 		return ""
 	}
 

@@ -25,5 +25,5 @@ func GetTOTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.NewSuccessData(w, map[string]string{"totp_url": totpURL}, response.SuccessGenerateTOTP)
+	response.NewSuccessData(w, map[string]string{"totp_url": totpURL})
 }

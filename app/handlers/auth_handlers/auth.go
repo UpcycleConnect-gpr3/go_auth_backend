@@ -10,36 +10,40 @@ import (
 	"net/http"
 )
 
-type TokenResponse struct {
-	BearerToken string `json:"bearer_token"`
-}
-
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
 	log.Api(r)
 
 	var credentials user_models.Credentials
-	err := json.NewDecoder(r.Body).Decode(&credentials)
-
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		response.NewErrorMessage(w, response.ErrJson, http.StatusBadRequest)
 		return
 	}
 
-	validationErrors, existing := user_actions.Login(credentials)
+	hash, totpRequired, validationErrors, user := user_actions.Login(credentials)
 
 	if len(validationErrors) > 0 {
 		response.NewValidationError(w, response.ErrInvalidBody, validationErrors)
 		return
 	}
 
-	token, err := jwt.GenerateJWT(existing.Id.String())
-	if err != nil {
-		response.NewErrorMessage(w, "Échec de la génération du token", http.StatusInternalServerError)
+	if totpRequired {
+		response.NewSuccessData(w, map[string]interface{}{
+			"hash":          hash,
+			"totp_required": true,
+		})
 		return
 	}
 
-	response.NewSuccessData(w, TokenResponse{BearerToken: token}, response.SuccessLogin)
+	token, err := jwt.GenerateJWT(user.Id.String())
+	if err != nil {
+		response.NewErrorMessage(w, response.ErrGenerateToken, http.StatusInternalServerError)
+		return
+	}
+
+	response.NewSuccessData(w, map[string]interface{}{
+		"bearer_token":  token,
+		"totp_required": false,
+	})
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,14 +68,4 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-
-	/*	token, err := jwt.GenerateJWT(existing.Id.String())
-		if err != nil {
-			http.Error(w, "Error generating token", http.StatusInternalServerError)
-			return
-		}
-
-		tokenResponse := TokenResponse{BearerToken: token}
-		encodedToken, _ := json.Marshal(tokenResponse)
-		fmt.Fprintf(w, "%s", encodedToken)*/
 }

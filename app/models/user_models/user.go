@@ -4,6 +4,7 @@ import (
 	"authentication_backend/database"
 	"authentication_backend/utils/log"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -47,13 +48,13 @@ func (u *User) CheckPassword(password string) bool {
 	return err == nil
 }
 
-func GetUserByEmail(email string) *User {
+func GetUserByEmailAuth(email string) *User {
 	user := User{}
 	action := fmt.Sprintf("SELECT "+TABLE+" WHERE email : %s", email)
 
-	row := database.Auth.QueryRow("SELECT id, email, password FROM "+TABLE+" WHERE email = ?", email)
+	row := database.Auth.QueryRow("SELECT id, email, password, totp_enabled FROM "+TABLE+" WHERE email = ?", email)
 
-	err := row.Scan(&user.Id, &user.Email, &user.password)
+	err := row.Scan(&user.Id, &user.Email, &user.password, &user.TOTPEnabled)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -87,12 +88,12 @@ func GetUserByID(id string) *User {
 	user := User{}
 	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
 
-	row := database.Auth.QueryRow("SELECT id, email FROM "+TABLE+" WHERE id = ?", id)
+	row := database.Auth.QueryRow("SELECT id, email, totp_secret FROM "+TABLE+" WHERE id = ?", id)
 
-	err := row.Scan(&user.Id, &user.Email)
+	err := row.Scan(&user.Id, &user.Email, &user.TOTPSecret)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
 		log.Database(action, err)
@@ -127,7 +128,7 @@ func GetUserByIDWithTOTP(id string) *User {
 	err := row.Scan(&user.Id, &user.TOTPSecret, &user.TOTPEnabled)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
 		log.Database(action, err)

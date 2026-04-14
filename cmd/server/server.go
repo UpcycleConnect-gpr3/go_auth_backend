@@ -53,6 +53,7 @@ func Start() {
 	http.HandleFunc("GET /health/{$}", limiterLow.RateLimit(containerTest(metric_handlers.Health)))
 
 	http.HandleFunc("POST /auth/login/{$}", limiterLow.RateLimit(auth_handlers.LoginHandler))
+	http.HandleFunc("POST /auth/login-totp/{$}", limiterLow.RateLimit(auth_handlers.ValidateTOTPHandler))
 	http.HandleFunc("POST /auth/register/{$}", limiterLow.RateLimit(auth_handlers.RegisterHandler))
 
 	http.HandleFunc("POST /user/{userId}/totp/{$}", totp_handlers.PostTOTP)

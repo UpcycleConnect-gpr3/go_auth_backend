@@ -3,6 +3,9 @@ package server
 import (
 	"authentication_backend/app/handlers/auth_handlers"
 	"authentication_backend/app/handlers/metric_handlers"
+	"authentication_backend/app/handlers/totp_handlers"
+	"authentication_backend/app/middleware/auth_middleware"
+	"authentication_backend/app/middleware/ratelimit_middleware"
 	"authentication_backend/app/middleware/source_middleware"
 	"authentication_backend/config"
 	"authentication_backend/database"
@@ -39,13 +42,25 @@ func Start() {
 
 	initialize()
 
+	limiterLow := ratelimit_middleware.NewRateLimiter(10, 1*time.Minute)
+	//limiter_medium := ratelimit_middleware.NewRateLimiter(10, 1*time.Minute)
+	//limiter_hight := ratelimit_middleware.NewRateLimiter(10, 1*time.Minute)
+
+	isAuth := auth_middleware.IsAuth
+
+	containerTest := source_middleware.Container("test")
+
 	logger := log.NewLoggerBuilder().WithLogLevel(zerolog.DebugLevel).WithBufferSize(10000).WithRateLimit(1000).WithGroupWindow(2 * time.Second).WithOutput(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).Build()
 	defer logger.Close()
 
-	http.HandleFunc("GET /health/{$}", source_middleware.Container("test")(metric_handlers.Health))
+	http.HandleFunc("GET /health/{$}", limiterLow.RateLimit(containerTest(metric_handlers.Health)))
 
-	http.HandleFunc("POST /auth/login/{$}", auth_handlers.LoginHandler)
-	http.HandleFunc("POST /auth/register/{$}", auth_handlers.RegisterHandler)
+	http.HandleFunc("POST /auth/login/{$}", limiterLow.RateLimit(auth_handlers.LoginHandler))
+	http.HandleFunc("POST /auth/login-totp/{$}", limiterLow.RateLimit(auth_handlers.ValidateTOTPHandler))
+	http.HandleFunc("POST /auth/register/{$}", limiterLow.RateLimit(auth_handlers.RegisterHandler))
+
+	http.HandleFunc("POST /auth/totp/{$}", limiterLow.RateLimit(isAuth(totp_handlers.PostTOTP)))
+	http.HandleFunc("GET /auth/totp/{$}", limiterLow.RateLimit(isAuth(totp_handlers.GetTOTP)))
 
 	logger.Info().Msg("Listening at http://localhost:" + os.Getenv("APP_PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("APP_PORT"), nil)

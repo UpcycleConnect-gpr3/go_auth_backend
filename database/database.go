@@ -1,5 +1,7 @@
 package database
 
-import "database/sql"
+import (
+	"github.com/jmoiron/sqlx"
+)
 
-var Auth *sql.DB
+var Auth *sqlx.DB

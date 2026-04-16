@@ -3,8 +3,7 @@ package user_models
 import (
 	"authentication_backend/database"
 	"authentication_backend/utils/log"
-	"database/sql"
-	"errors"
+	"authentication_backend/utils/sql_builder"
 	"fmt"
 	"time"
 
@@ -17,12 +16,12 @@ const (
 )
 
 type User struct {
-	Id          uuid.UUID `json:"id"`
-	Username    string    `json:"username"`
-	Firstname   string    `json:"firstname"`
-	Lastname    string    `json:"lastname"`
-	password    string    `db:"password" json:"-"`
-	Email       string    `json:"email"`
+	Id          uuid.UUID `db:"id" json:"id"`
+	Username    string    `db:"username" json:"username"`
+	Firstname   string    `db:"firstname" json:"firstname"`
+	Lastname    string    `db:"lastname" json:"lastname"`
+	Password    string    `db:"password" json:"-"`
+	Email       string    `db:"email" json:"email"`
 	TOTPSecret  string    `db:"totp_secret" json:"-"`
 	TOTPEnabled bool      `db:"totp_enabled" json:"totp_enabled"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
@@ -34,78 +33,51 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-func (u *User) Password(password string) error {
+func (u *User) SetPassword(password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	u.password = string(hashedPassword)
+	u.Password = string(hashedPassword)
 	return nil
 }
 
 func (u *User) CheckPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
 }
 
-func GetUserByEmailAuth(email string) *User {
-	user := User{}
-	action := fmt.Sprintf("SELECT "+TABLE+" WHERE email : %s", email)
-
-	row := database.Auth.QueryRow("SELECT id, email, password, totp_enabled FROM "+TABLE+" WHERE email = ?", email)
-
-	err := row.Scan(&user.Id, &user.Email, &user.password, &user.TOTPEnabled)
-
+func GetUserBy(columns []string, by string, value any) *User {
+	query := sql_builder.SelectQuery(TABLE, columns, by)
+	user := &User{}
+	err := database.Auth.Get(user, query, value)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil
-		}
-		log.Database(action, err)
+		log.Database(query, err)
 		return nil
 	}
-
-	if err = row.Err(); err != nil {
-		log.Database(action, err)
-		return nil
-	}
-
-	return &user
+	return user
 }
 
-func CreateUser(user Credentials) {
-	action := fmt.Sprintf("INSERT INTO "+TABLE+" : %s", user.Email)
+func CreateUser(user Credentials) *User {
+	action := fmt.Sprintf("INSERT INTO %s : %s", TABLE, user.Email)
 
-	hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-
-	_, err := database.Auth.Exec("INSERT INTO "+TABLE+" (id, email, password) VALUES (?, ?, ?)", uuid.New().String(), user.Email, hashed)
-
+	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Database(action, err)
-	}
-}
-
-func GetUserByID(id string) *User {
-	user := User{}
-	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
-
-	row := database.Auth.QueryRow("SELECT id, email, totp_secret FROM "+TABLE+" WHERE id = ?", id)
-
-	err := row.Scan(&user.Id, &user.Email, &user.TOTPSecret)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil
-		}
 		log.Database(action, err)
 		return nil
 	}
 
-	if err = row.Err(); err != nil {
+	id := uuid.New()
+	columns := []string{"id", "email", "password"}
+	query := sql_builder.InsertQuery(TABLE, columns)
+
+	_, err = database.Auth.Exec(query, id.String(), user.Email, hashed)
+	if err != nil {
 		log.Database(action, err)
 		return nil
 	}
 
-	return &user
+	return &User{Id: id}
 }
 
 func UpdateUserTOTP(user *User) error {
@@ -117,28 +89,4 @@ func UpdateUserTOTP(user *User) error {
 		return err
 	}
 	return nil
-}
-
-func GetUserByIDWithTOTP(id string) *User {
-	user := User{}
-	action := fmt.Sprintf("SELECT "+TABLE+" WHERE id : %s", id)
-
-	row := database.Auth.QueryRow("SELECT id, totp_secret, totp_enabled FROM "+TABLE+" WHERE id = ?", id)
-
-	err := row.Scan(&user.Id, &user.TOTPSecret, &user.TOTPEnabled)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil
-		}
-		log.Database(action, err)
-		return nil
-	}
-
-	if err = row.Err(); err != nil {
-		log.Database(action, err)
-		return nil
-	}
-
-	return &user
 }

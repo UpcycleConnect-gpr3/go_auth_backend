@@ -13,7 +13,7 @@ func DeleteTOTP(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.PathValue("userId")
 
-	user := user_models.GetUserByID(userID)
+	user := user_models.GetUserBy([]string{"id"}, "id = ?", userID)
 	if user == nil {
 		response.NewErrorMessage(w, response.ErrUserNotFound, http.StatusInternalServerError)
 		return

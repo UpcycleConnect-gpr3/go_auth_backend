@@ -60,7 +60,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		response.NewErrorMessage(w, response.ErrInvalidBody, http.StatusBadRequest)
 	}
 
-	validationErrors := user_actions.CreateUser(userDto)
+	user, validationErrors := user_actions.CreateUser(userDto)
 
 	if len(validationErrors) > 0 {
 		response.NewValidationError(w, response.ErrInvalidBody, validationErrors)
@@ -68,4 +68,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	response.NewSuccessData(w, map[string]interface{}{
+		"user_id": user.Id,
+	})
 }

@@ -19,7 +19,7 @@ func loginValidateCredential(userDto user_models.Credentials) ([]rules.Validatio
 	rules.StringMinLength(userDto.Password, 6, "password", &errs)
 	rules.StringMaxLength(userDto.Password, 30, "password", &errs)
 
-	existing := user_models.GetUserByEmailAuth(userDto.Email)
+	existing := user_models.GetUserBy([]string{"id", "email", "password", "totp_enabled"}, "email = ?", userDto.Email)
 	if existing == nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",

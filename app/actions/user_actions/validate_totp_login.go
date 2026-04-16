@@ -18,7 +18,7 @@ func ValidateTOTPAndLogin(hash, totpCode string) (string, error) {
 		return "", fmt.Errorf(response.ErrInvalidOrExpiredHash)
 	}
 
-	user := user_models.GetUserByID(totpRecord.UserID)
+	user := user_models.GetUserBy([]string{"id", "totp_secret"}, "id = ?", totpRecord.UserID)
 	if user == nil {
 		return "", fmt.Errorf(response.ErrUserNotFound)
 	}

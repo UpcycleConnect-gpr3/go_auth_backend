@@ -13,7 +13,7 @@ func createValidateUser(userDto user_models.Credentials) []rules.ValidationError
 	rules.StringMaxLength(userDto.Password, 30, "password", &errs)
 	rules.MustContainsAny(userDto.Password, "!@#$%^&*()", 1, "password", &errs)
 
-	existing := user_models.GetUserByEmailAuth(userDto.Email)
+	existing := user_models.GetUserBy([]string{"id", "email"}, "email = ?", userDto.Email)
 	if existing != nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
@@ -24,15 +24,15 @@ func createValidateUser(userDto user_models.Credentials) []rules.ValidationError
 	return errs
 }
 
-func CreateUser(userDto user_models.Credentials) []rules.ValidationError {
+func CreateUser(userDto user_models.Credentials) (*user_models.User, []rules.ValidationError) {
 
 	validationError := createValidateUser(userDto)
 
 	if len(validationError) > 0 {
-		return validationError
+		return nil, validationError
 	}
 
-	user_models.CreateUser(userDto)
+	user := user_models.CreateUser(userDto)
 
-	return nil
+	return user, nil
 }

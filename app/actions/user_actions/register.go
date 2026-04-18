@@ -15,7 +15,7 @@ func createValidateUser(userDto user_models.Credentials) []rules.ValidationError
 	rules.MustContainsAny(userDto.Password, "!@#$%^&*()", 1, "password", &errs)
 
 	err := user.Get([]string{"id", "email"}, "email = ?", userDto.Email)
-	if err != nil {
+	if err == nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
 			Message: "email must be unique",

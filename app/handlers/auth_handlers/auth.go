@@ -47,7 +47,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
 	log.Api(r)
 
 	w.Header().Set("Content-Type", "application/json")

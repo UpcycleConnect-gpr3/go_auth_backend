@@ -2,7 +2,7 @@ package totp_handlers
 
 import (
 	"authentication_backend/app/actions/totp_actions"
-	"authentication_backend/app/models/user_models"
+	"authentication_backend/utils/auth"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/response"
 	"net/http"
@@ -11,13 +11,7 @@ import (
 func DeleteTOTP(w http.ResponseWriter, r *http.Request) {
 	log.Api(r)
 
-	userID := r.PathValue("userId")
-
-	user := user_models.GetUserBy([]string{"id"}, "id = ?", userID)
-	if user == nil {
-		response.NewErrorMessage(w, response.ErrUserNotFound, http.StatusInternalServerError)
-		return
-	}
+	user := auth.Auth(r).User(w, []string{})
 
 	if err := totp_actions.DisableTOTP(user); err != nil {
 		response.NewErrorMessage(w, response.ErrDisableTOTP, http.StatusInternalServerError)

@@ -57,6 +57,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		response.NewErrorMessage(w, response.ErrInvalidBody, http.StatusBadRequest)
+		return
 	}
 
 	user, validationErrors := user_actions.CreateUser(userDto)

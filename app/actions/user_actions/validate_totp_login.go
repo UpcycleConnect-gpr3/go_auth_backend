@@ -18,12 +18,14 @@ func ValidateTOTPAndLogin(hash, totpCode string) (string, error) {
 		return "", fmt.Errorf(response.ErrInvalidOrExpiredHash)
 	}
 
-	user := user_models.GetUserBy([]string{"id", "totp_secret"}, "id = ?", totpRecord.UserID)
-	if user == nil {
+	var user user_models.User
+	err = user.Get([]string{"id", "totp_secret"}, "id = ?", totpRecord.UserID)
+
+	if err != nil {
 		return "", fmt.Errorf(response.ErrUserNotFound)
 	}
 
-	if !totp_actions.ValidateTOTP(user, totpCode) {
+	if !totp_actions.ValidateTOTP(&user, totpCode) {
 		return "", fmt.Errorf(response.ErrInvalidTOTP)
 	}
 

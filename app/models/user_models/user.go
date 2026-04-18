@@ -2,10 +2,10 @@ package user_models
 
 import (
 	"authentication_backend/database"
+	"authentication_backend/utils/db"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/sql_builder"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -24,8 +24,8 @@ type User struct {
 	Email       string    `db:"email" json:"email"`
 	TOTPSecret  string    `db:"totp_secret" json:"-"`
 	TOTPEnabled bool      `db:"totp_enabled" json:"totp_enabled"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt   string    `db:"created_at" json:"created_at"`
+	UpdatedAt   string    `db:"updated_at" json:"updated_at"`
 }
 
 type Credentials struct {
@@ -33,29 +33,26 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-func (u *User) SetPassword(password string) error {
+func (user *User) SetPassword(password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	u.Password = string(hashedPassword)
+	user.Password = string(hashedPassword)
 	return nil
 }
 
-func (u *User) CheckPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+func (user *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	return err == nil
 }
 
-func GetUserBy(columns []string, by string, value any) *User {
-	query := sql_builder.SelectQuery(TABLE, columns, by)
-	user := &User{}
-	err := database.Auth.Get(user, query, value)
-	if err != nil {
-		log.Database(query, err)
-		return nil
-	}
-	return user
+func (user *User) Get(columns []string, by string, value any) error {
+	return db.GetQuery[User](database.Auth, TABLE, columns, by, value, user)
+}
+
+func (user *User) All(columns []string, dest *[]User) error {
+	return db.AllQuery[User](database.Auth, TABLE, columns, dest)
 }
 
 func CreateUser(user Credentials) *User {

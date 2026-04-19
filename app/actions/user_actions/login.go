@@ -14,30 +14,31 @@ import (
 
 func loginValidateCredential(userDto user_models.Credentials) ([]rules.ValidationError, *user_models.User) {
 	var errs []rules.ValidationError
+	var user user_models.User
 
 	rules.StringMinLength(userDto.Email, 5, "email", &errs)
 	rules.StringMinLength(userDto.Password, 6, "password", &errs)
 	rules.StringMaxLength(userDto.Password, 30, "password", &errs)
 
-	existing := user_models.GetUserBy([]string{"id", "email", "password", "totp_enabled"}, "email = ?", userDto.Email)
-	if existing == nil {
+	err := user.Get([]string{"id", "email", "password", "totp_enabled"}, "email = ?", userDto.Email)
+	if err != nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
 			Message: response.ErrAuthFailed,
 		})
-		return errs, existing
+		return errs, &user
 	}
 
-	isCorrectPassword := existing.CheckPassword(userDto.Password)
+	isCorrectPassword := user.CheckPassword(userDto.Password)
 
-	if !isCorrectPassword || userDto.Email != existing.Email {
+	if !isCorrectPassword || userDto.Email != user.Email {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
 			Message: response.ErrAuthFailed,
 		})
 	}
 
-	return errs, existing
+	return errs, &user
 }
 
 func Login(credentials user_models.Credentials) (string, bool, []rules.ValidationError, *user_models.User) {

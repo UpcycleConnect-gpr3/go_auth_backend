@@ -47,7 +47,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
 	log.Api(r)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -58,6 +57,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		response.NewErrorMessage(w, response.ErrInvalidBody, http.StatusBadRequest)
+		return
 	}
 
 	user, validationErrors := user_actions.CreateUser(userDto)

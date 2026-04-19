@@ -2,9 +2,8 @@ package totp_handlers
 
 import (
 	"authentication_backend/app/actions/totp_actions"
-	"authentication_backend/app/middleware/auth_middleware"
 	"authentication_backend/app/models/totp_models"
-	"authentication_backend/app/models/user_models"
+	"authentication_backend/utils/auth"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/response"
 	"encoding/json"
@@ -14,8 +13,6 @@ import (
 func PostTOTP(w http.ResponseWriter, r *http.Request) {
 	log.Api(r)
 
-	userID := auth_middleware.GetUserId(r.Context())
-
 	request := totp_models.TOTPCodeRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -23,12 +20,7 @@ func PostTOTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := user_models.GetUserBy([]string{"id", "totp_secret", "totp_enabled"}, "id = ?", userID)
-
-	if user == nil {
-		response.NewErrorMessage(w, response.ErrUserNotFound, http.StatusNotFound)
-		return
-	}
+	user := auth.Auth(r).User(w, []string{"id", "totp_secret", "totp_enabled"})
 
 	if !totp_actions.ValidateTOTP(user, request.Code) {
 		response.NewErrorMessage(w, response.ErrInvalidTOTP, http.StatusBadRequest)

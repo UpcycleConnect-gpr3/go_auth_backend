@@ -70,6 +70,7 @@ var httpStatusTexts = map[int]string{
 }
 
 const (
+	ErrInvalidValue         = "Invalid Value"
 	ErrAuthFailed           = "Credentials do not match"
 	ErrInvalidBody          = "Incorrect body format"
 	ErrJson                 = "Json parse error"

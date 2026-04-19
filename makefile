@@ -11,6 +11,13 @@ build:
 	@go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_FILE)
 	@echo "Binaire généré : $(BUILD_DIR)/$(BINARY_NAME)"
 
+generate-keys:
+	@echo "Generate Private Key :"
+	@openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
+	@echo "Generate Public Key :"
+	@openssl pkey -in private_key.pem -pubout -out public_key.pem
+	@echo "Keys Generate Successfully !!!"
+
 migrate:
 	@go run $(MAIN_FILE) migrate
 

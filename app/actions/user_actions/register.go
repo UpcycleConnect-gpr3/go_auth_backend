@@ -11,11 +11,11 @@ func createValidateUser(userDto user_models.Credentials) []rules.ValidationError
 
 	rules.StringMinLength(userDto.Email, 5, "email", &errs)
 	rules.StringMinLength(userDto.Password, 6, "password", &errs)
-	rules.StringMaxLength(userDto.Password, 30, "password", &errs)
+	rules.StringMaxLength(userDto.Password, 128, "password", &errs)
 	rules.MustContainsAny(userDto.Password, "!@#$%^&*()", 1, "password", &errs)
 
 	err := user.Get([]string{"id", "email"}, "email = ?", userDto.Email)
-	if err != nil {
+	if err == nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
 			Message: "email must be unique",

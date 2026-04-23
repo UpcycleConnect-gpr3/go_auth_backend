@@ -24,3 +24,10 @@ migrate:
 clean:
 	@echo "Nettoyage des fichiers générés..."
 	@rm -rf $(BUILD_DIR)
+
+handler:
+	@mkdir -p app/handlers/${name}_handlers
+	@sed "s/{{.PackageName}}/$(shell echo ${name}_handlers | tr '[:upper:]' '[:lower:]')/g; \
+		s/{{.ResourceName}}/$(shell echo ${name} | sed 's/^./\U&/')/g" \
+		templates/handler.go.tpl > app/handlers/${name}_handlers/${name}.go
+	@echo "Handler generated: app/handlers/${name}_handlers/${name}.go"

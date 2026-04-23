@@ -1,8 +1,8 @@
 package {{.PackageName}}
 
 import (
-	"authentication_backend/app/models/{{.ResourceLower}}_models"
-	"authentication_backend/utils/rules"
+	"{{.ModuleName}}/app/models/{{.ResourceLower}}_models"
+	"{{.ModuleName}}/utils/rules"
 )
 
 type Create{{.ResourceName}}DTO struct {

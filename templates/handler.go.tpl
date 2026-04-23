@@ -1,8 +1,8 @@
 package {{.PackageName}}
 
 import (
-	"authentication_backend/utils/log"
-	"authentication_backend/utils/response"
+	"{{.ModuleName}}/utils/log"
+	"{{.ModuleName}}/utils/response"
 	"net/http"
 )
 

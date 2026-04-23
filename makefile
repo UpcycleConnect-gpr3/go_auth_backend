@@ -31,3 +31,12 @@ handler:
 		s/{{.ResourceName}}/$(shell echo ${name} | sed 's/^./\U&/')/g" \
 		templates/handler.go.tpl > app/handlers/${name}_handlers/${name}.go
 	@echo "Handler generated: app/handlers/${name}_handlers/${name}.go"
+
+action:
+	@mkdir -p app/actions/${name}_actions && \
+	resource_lower=$$(echo ${name} | tr '[:upper:]' '[:lower:]') && \
+	resource_upper=$$(echo ${name} | sed 's/^./\U&/') && \
+	pkg=$$(echo ${name}_actions | tr '[:upper:]' '[:lower:]') && \
+	sed "s/{{.PackageName}}/$$pkg/g; s/{{.ResourceName}}/$$resource_upper/g; s/{{.ResourceLower}}/$$resource_lower/g" templates/action_create.go.tpl > app/actions/${name}_actions/create.go && \
+	sed "s/{{.PackageName}}/$$pkg/g; s/{{.ResourceName}}/$$resource_upper/g; s/{{.ResourceLower}}/$$resource_lower/g" templates/action_update.go.tpl > app/actions/${name}_actions/update.go && \
+	echo "Actions generated: app/actions/${name}_actions/create.go, app/actions/${name}_actions/update.go"

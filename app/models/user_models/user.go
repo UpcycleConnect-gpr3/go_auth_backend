@@ -18,8 +18,8 @@ const (
 type User struct {
 	Id          uuid.UUID `db:"id" json:"id"`
 	Username    string    `db:"username" json:"username"`
-	Firstname   string    `db:"firstname" json:"firstname"`
-	Lastname    string    `db:"lastname" json:"lastname"`
+	Firstname   *string   `db:"firstname" json:"firstname"`
+	Lastname    *string   `db:"lastname" json:"lastname"`
 	Password    string    `db:"password" json:"-"`
 	Email       string    `db:"email" json:"email"`
 	TOTPSecret  string    `db:"totp_secret" json:"-"`

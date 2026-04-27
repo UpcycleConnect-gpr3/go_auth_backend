@@ -3,11 +3,14 @@ package auth_handlers
 import (
 	"authentication_backend/app/actions/user_actions"
 	"authentication_backend/app/models/user_models"
+	"authentication_backend/utils/auth"
 	"authentication_backend/utils/jwt"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/response"
 	"encoding/json"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,4 +74,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	response.NewSuccessData(w, map[string]interface{}{
 		"user_id": user.Id,
 	})
+}
+
+func ShowMeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Api(r)
+
+	columns := []string{"id", "firstname", "lastname", "email", "totp_enabled", "created_at", "updated_at"}
+	user := auth.Auth(r).User(w, columns)
+
+	if user.Id == uuid.Nil {
+		return
+	}
+
+	response.NewSuccessData(w, user)
 }

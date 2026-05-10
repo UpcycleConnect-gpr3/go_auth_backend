@@ -1,0 +1,77 @@
+package filesystem
+
+import (
+	"authentication_backend/internal"
+	"authentication_backend/utils/log"
+	"context"
+	"fmt"
+	"io"
+	"strings"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+)
+
+var PrivateStorage internal.RustFSBucket
+var PublicStorage internal.RustFSBucket
+
+type UploadParams struct {
+	Key     string
+	Content string
+}
+
+func ListRustFS(client *s3.Client) []string {
+	resp, err := client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buckets := make([]string, len(resp.Buckets))
+	for i, b := range resp.Buckets {
+		buckets[i] = *b.Name
+	}
+	return buckets
+}
+
+func ListObjects(bucket internal.RustFSBucket) {
+	ctx := context.TODO()
+	resp, err := bucket.Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucket.BucketName),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, obj := range resp.Contents {
+		fmt.Println(" -", *obj.Key)
+	}
+}
+
+func UploadObject(bucket internal.RustFSBucket, params UploadParams) {
+	ctx := context.TODO()
+	_, err := bucket.Client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(bucket.BucketName),
+		Key:    aws.String(params.Key),
+		Body:   strings.NewReader(params.Content),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func GetObject(bucket internal.RustFSBucket, id string) (string, error) {
+	ctx := context.TODO()
+	resp, err := bucket.Client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(bucket.BucketName),
+		Key:    aws.String(id),
+	})
+	if err != nil {
+		return "", fmt.Errorf("download object failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("read object content failed: %v", err)
+	}
+	return string(data), nil
+}

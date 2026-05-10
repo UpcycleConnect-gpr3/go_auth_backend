@@ -31,6 +31,7 @@ func initialize() {
 
 	// Config Initialization
 	config.InitDatabase()
+	config.InitEmail()
 
 	err = database.Auth.Ping()
 

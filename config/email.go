@@ -2,7 +2,7 @@ package config
 
 import (
 	"authentication_backend/internal"
-	"authentication_backend/internal/email"
+	"authentication_backend/var/email"
 	"os"
 
 	"github.com/wneessen/go-mail"

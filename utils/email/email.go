@@ -1,16 +1,14 @@
 package email
 
 import (
-	"authentication_backend/internal"
 	"authentication_backend/utils/log"
+	"authentication_backend/var/email"
 	"fmt"
 	ht "html/template"
 	tt "text/template"
 
 	"github.com/wneessen/go-mail"
 )
-
-var Contact internal.Email
 
 type User struct {
 	Firstname string
@@ -36,7 +34,7 @@ func SendEmail(from, to, subject, body string, attachments ...*mail.File) error 
 		message.SetAttachments(attachments)
 	}
 
-	if err := Contact.Client.DialAndSend(message); err != nil {
+	if err := email.Contact.Client.DialAndSend(message); err != nil {
 		log.Fatal(fmt.Errorf("failed to deliver mail: %s", err))
 		return err
 	}
@@ -55,7 +53,7 @@ func SendEmails(fromName, fromAddr string, users []User, subject string, textTpl
 		return fmt.Errorf("no valid messages to send")
 	}
 
-	if err := Contact.Client.DialAndSend(messages...); err != nil {
+	if err := email.Contact.Client.DialAndSend(messages...); err != nil {
 		log.Fatal(fmt.Errorf("failed to deliver bulk mail: %s", err))
 		return err
 	}

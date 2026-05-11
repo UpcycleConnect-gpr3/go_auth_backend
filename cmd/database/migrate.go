@@ -2,9 +2,9 @@ package database
 
 import (
 	"authentication_backend/config"
-	"authentication_backend/internal/database"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/migration"
+	"authentication_backend/var/database"
 
 	"github.com/joho/godotenv"
 )

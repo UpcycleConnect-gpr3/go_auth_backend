@@ -2,7 +2,7 @@ package config
 
 import (
 	"authentication_backend/internal"
-	"authentication_backend/internal/database"
+	"authentication_backend/var/database"
 	"os"
 )
 

@@ -9,7 +9,7 @@ import (
 	"authentication_backend/app/middleware/ratelimit_middleware"
 	"authentication_backend/app/middleware/source_middleware"
 	"authentication_backend/config"
-	"authentication_backend/internal/database"
+	"authentication_backend/var/database"
 	"net/http"
 	"os"
 	"time"

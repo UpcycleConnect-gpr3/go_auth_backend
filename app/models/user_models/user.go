@@ -1,10 +1,10 @@
 package user_models
 
 import (
-	"authentication_backend/internal/database"
 	"authentication_backend/utils/db"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/sql_builder"
+	"authentication_backend/var/database"
 	"fmt"
 
 	"github.com/google/uuid"

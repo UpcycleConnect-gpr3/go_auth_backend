@@ -12,9 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-var PrivateStorage internal.RustFSBucket
-var PublicStorage internal.RustFSBucket
-
 type UploadParams struct {
 	Key     string
 	Content string

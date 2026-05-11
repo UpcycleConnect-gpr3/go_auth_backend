@@ -1,7 +1,7 @@
 package user_models
 
 import (
-	"authentication_backend/database"
+	"authentication_backend/internal/database"
 	"authentication_backend/utils/db"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/sql_builder"

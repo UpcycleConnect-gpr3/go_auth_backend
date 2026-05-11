@@ -2,9 +2,9 @@ package database
 
 import (
 	"authentication_backend/config"
-	"authentication_backend/database"
-	"authentication_backend/internal"
+	"authentication_backend/internal/database"
 	"authentication_backend/utils/log"
+	"authentication_backend/utils/migration"
 
 	"github.com/joho/godotenv"
 )
@@ -25,7 +25,7 @@ func initialize() {
 		log.Fatal(err)
 	}
 
-	internal.CreateTableMigrations(database.Auth)
+	migration.CreateTableMigrations(database.Auth)
 
 }
 
@@ -33,6 +33,6 @@ func Migrate() {
 
 	initialize()
 
-	internal.Migrate(database.Auth)
+	migration.Migrate(database.Auth)
 
 }

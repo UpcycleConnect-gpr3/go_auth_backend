@@ -1,4 +1,4 @@
-package internal
+package migration
 
 import (
 	"authentication_backend/utils/log"

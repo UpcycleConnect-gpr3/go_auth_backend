@@ -1,8 +1,8 @@
 package config
 
 import (
-	"authentication_backend/filesystem"
 	"authentication_backend/internal"
+	"authentication_backend/internal/filesystem"
 	"os"
 )
 

@@ -1,8 +1,8 @@
 package config
 
 import (
-	"authentication_backend/database"
 	"authentication_backend/internal"
+	"authentication_backend/var/database"
 	"os"
 )
 

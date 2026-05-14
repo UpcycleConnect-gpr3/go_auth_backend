@@ -1,7 +1,7 @@
 package totp_models
 
 import (
-	"authentication_backend/database"
+	"authentication_backend/var/database"
 	"database/sql"
 	"time"
 )

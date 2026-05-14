@@ -55,6 +55,18 @@ services:
       - "traefik.http.routers.pma_auth.rule=Host(`pma-auth.localhost`)"
       - "traefik.http.services.pma_auth.loadbalancer.server.port=80"
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - 8025:8025
+      - 1025:1025
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
   rustfs_perms:
     image: alpine
     user: root

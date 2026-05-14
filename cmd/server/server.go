@@ -31,6 +31,7 @@ func initialize() {
 
 	// Config Initialization
 	config.InitDatabase()
+	config.InitFilesystem()
 
 	err = database.Auth.Ping()
 

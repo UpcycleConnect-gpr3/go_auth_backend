@@ -67,6 +67,32 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
+  rustfs_perms:
+    image: alpine
+    user: root
+    volumes:
+      - ./rustfs_data:/data
+    command: chown -R 10001:10001 /data
+    restart: on-failure
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs_server
+    depends_on:
+      rustfs_perms:
+        condition: service_completed_successfully
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./rustfs_data:/data
+    environment:
+      - RUSTFS_ACCESS_KEY=rustfsadmin
+      - RUSTFS_SECRET_KEY=rustfsadmin
+      - RUSTFS_CONSOLE_ENABLE=true
+    command: [ "/data" ]
+    restart: unless-stopped
+
 volumes:
   mariadb_auth_data:
 

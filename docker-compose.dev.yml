@@ -94,5 +94,3 @@ volumes:
 networks:
   mariadb_auth_phpmyadmin_auth_network:
   app_auth_mariadb_auth_network:
-  traefik_network:
-    external: true

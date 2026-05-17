@@ -1,0 +1,98 @@
+services:
+  app_auth:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .env:/app/.env
+      - ./private_key.pem:/app/private_key.pem
+      - ./public_key.pem:/app/public_key.pem
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    restart: unless-stopped
+    networks:
+      - app_auth_mariadb_auth_network
+    depends_on:
+      mariadb_auth:
+        condition: service_healthy
+
+  mariadb_auth:
+    image: mariadb:11
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: 1
+      MARIADB_USER: "${DATABASE_USERNAME}"
+      MARIADB_PASSWORD: "${DATABASE_PASSWORD}"
+      MARIADB_DATABASE: "${DATABASE_NAME}"
+    ports:
+      - "${DATABASE_PORT}:3306"
+    volumes:
+      - mariadb_auth_data:/var/lib/mysql
+    networks:
+      - mariadb_auth_phpmyadmin_auth_network
+      - app_auth_mariadb_auth_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin_auth:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: "${DATABASE_HOST}"
+      PMA_USER: "${DATABASE_USERNAME}"
+      PMA_PASSWORD: "${DATABASE_PASSWORD}"
+      PMA_PORT: "${DATABASE_PORT}"
+    depends_on:
+      - mariadb_auth
+    ports:
+      - "8080:80"
+    networks:
+      - mariadb_auth_phpmyadmin_auth_network
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  rustfs_perms:
+    image: alpine
+    user: root
+    volumes:
+      - ./rustfs_data:/data
+    command: chown -R 10001:10001 /data
+    restart: on-failure
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    depends_on:
+      rustfs_perms:
+        condition: service_completed_successfully
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./rustfs_data:/data
+    environment:
+      - RUSTFS_ACCESS_KEY=rustfsadmin
+      - RUSTFS_SECRET_KEY=rustfsadmin
+      - RUSTFS_CONSOLE_ENABLE=true
+    command: [ "/data" ]
+    restart: unless-stopped
+
+volumes:
+  mariadb_auth_data:
+
+networks:
+  mariadb_auth_phpmyadmin_auth_network:
+  app_auth_mariadb_auth_network:
+  traefik_network:
+    external: true

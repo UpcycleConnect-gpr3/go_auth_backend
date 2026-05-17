@@ -1,5 +1,6 @@
 services:
   app_auth:
+    container_name: app_auth
     build:
       context: .
       target: dev
@@ -17,6 +18,7 @@ services:
         condition: service_healthy
 
   mariadb_auth:
+    container_name: mariadb_auth
     image: mariadb:11
     environment:
       MARIADB_RANDOM_ROOT_PASSWORD: 1
@@ -33,11 +35,12 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 1s
+      timeout: 3s
+      retries: 15
 
   phpmyadmin_auth:
+    container_name: phpmyadmin_auth
     image: phpmyadmin/phpmyadmin
     environment:
       PMA_HOST: "${DATABASE_HOST}"
@@ -52,7 +55,8 @@ services:
       - mariadb_auth_phpmyadmin_auth_network
     restart: unless-stopped
 
-  mailpit:
+  mailpit_auth:
+    container_name: mailpit_auth
     image: axllent/mailpit
     restart: unless-stopped
     ports:
@@ -63,7 +67,7 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
-  rustfs_perms:
+  rustfs_perms_auth:
     image: alpine
     user: root
     volumes:
@@ -71,10 +75,11 @@ services:
     command: chown -R 10001:10001 /data
     restart: on-failure
 
-  rustfs:
+  rustfs_auth:
+    container_name: rustfs_auth
     image: rustfs/rustfs:latest
     depends_on:
-      rustfs_perms:
+      rustfs_perms_auth:
         condition: service_completed_successfully
     ports:
       - "9000:9000"

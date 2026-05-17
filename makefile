@@ -2,6 +2,7 @@ MAIN_FILE				=main.go
 BINARY_NAME 			=go_auth_backend
 BUILD_DIR				=build
 DOCKER_COMPOSE_DEV_FILE	=docker-compose.dev.yml
+APP_NAME				=app_auth
 
 help:
 	@echo "Available commands:"
@@ -55,7 +56,7 @@ docker-dev-logs:
 	@docker compose -f $(DOCKER_COMPOSE_DEV_FILE) logs -f
 
 docker-migrate:
-	@docker exec -it authentication_backend-app_auth-1 go run $(MAIN_FILE) migrate
+	@docker exec -it $(APP_NAME) go run $(MAIN_FILE) migrate
 
 # --- Utilities ---
 generate-keys:

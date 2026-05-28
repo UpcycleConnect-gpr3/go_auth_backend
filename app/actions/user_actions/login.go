@@ -31,7 +31,7 @@ func loginValidateCredential(userDto user_models.Credentials) ([]rules.Validatio
 
 	isCorrectPassword := user.CheckPassword(userDto.Password)
 
-	if !isCorrectPassword || userDto.Email != user.Email {
+	if !isCorrectPassword || userDto.Email != *user.Email {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",
 			Message: response.ErrAuthFailed,

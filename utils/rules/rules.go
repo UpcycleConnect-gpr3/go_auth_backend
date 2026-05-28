@@ -1,8 +1,13 @@
 package rules
 
 import (
+	db2 "authentication_backend/utils/db"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type ValidationError struct {
@@ -95,5 +100,26 @@ func StringStart(value string, prefix string, attribute string, errs *[]Validati
 			Field:   attribute,
 			Message: fmt.Sprintf("%s must be prefixed by %s", attribute, prefix),
 		})
+	}
+}
+
+func Unique[T any](db *sqlx.DB, table, attribute string, by string, errs *[]ValidationError, values ...interface{}) {
+	var modelT T
+
+	err := db2.GetQuery[T](db, table, &modelT, []string{"id", "email"}, by, values...)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		println(err.Error())
+		*errs = append(*errs, ValidationError{
+			Field:   attribute,
+			Message: fmt.Sprintf("%s error", attribute)})
+		return
+	}
+
+	if err == nil {
+		*errs = append(*errs, ValidationError{
+			Field:   attribute,
+			Message: fmt.Sprintf("%s must be unique", attribute)})
+		return
 	}
 }

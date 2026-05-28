@@ -91,6 +91,7 @@ const (
 	SuccessDisableTOTP  = "TOTP disabled successfully"
 	SuccessGenerateTOTP = "TOTP key generated successfully"
 	SuccessLogin        = "Login successful"
+	SuccessUserDeleted  = "User deleted successfully"
 )
 
 type Response struct {

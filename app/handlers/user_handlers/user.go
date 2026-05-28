@@ -1,10 +1,13 @@
 package user_handlers
 
 import (
+	"authentication_backend/app/actions/user_actions"
 	"authentication_backend/app/models/user_models"
+	"authentication_backend/utils/auth"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/request"
 	"authentication_backend/utils/response"
+	"encoding/json"
 	"net/http"
 )
 
@@ -44,12 +47,33 @@ func ShowUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Api(r)
-	// TODO: Implement
-	response.NewSuccessMessage(w, "User updated successfully")
+
+	userId := auth.Auth(r).Id()
+
+	var updateRequest user_models.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&updateRequest); err != nil {
+		response.NewErrorMessage(w, response.ErrJson, http.StatusBadRequest)
+		return
+	}
+
+	user, validationErrors := user_actions.UpdateUser(userId, updateRequest)
+	if len(validationErrors) > 0 {
+		response.NewValidationError(w, response.ErrInvalidBody, validationErrors)
+		return
+	}
+
+	response.NewSuccessData(w, user)
 }
 
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Api(r)
-	// TODO: Implement
-	response.NewSuccessMessage(w, "User deleted successfully")
+
+	userId := auth.Auth(r).Id()
+
+	if err := user_actions.DeleteUser(userId); err != nil {
+		response.NewErrorMessage(w, response.ErrUserNotFound, http.StatusNotFound)
+		return
+	}
+
+	response.NewSuccessMessage(w, response.SuccessUserDeleted)
 }

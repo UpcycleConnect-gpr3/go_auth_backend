@@ -8,9 +8,14 @@ import (
 )
 
 func GenerateAndStoreTOTP(user *user_models.User) (string, error) {
+	email := ""
+	if user.Email != nil {
+		email = *user.Email
+	}
+
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "Upcycle Connect",
-		AccountName: user.Email,
+		AccountName: email,
 	})
 	if err != nil {
 		log.Database("GenerateAndStoreTOTP", err)
@@ -18,7 +23,6 @@ func GenerateAndStoreTOTP(user *user_models.User) (string, error) {
 	}
 	user.TOTPEnabled = false
 	user.TOTPSecret = key.Secret()
-
 	if err := user_models.UpdateUserTOTP(user); err != nil {
 		log.Database("UpdateUserTOTP (store secret)", err)
 		return "", err

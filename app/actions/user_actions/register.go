@@ -3,24 +3,18 @@ package user_actions
 import (
 	"authentication_backend/app/models/user_models"
 	"authentication_backend/utils/rules"
+	"authentication_backend/var/database"
 )
 
 func createValidateUser(userDto user_models.Credentials) []rules.ValidationError {
 	var errs []rules.ValidationError
-	var user user_models.User
 
 	rules.StringMinLength(userDto.Email, 5, "email", &errs)
 	rules.StringMinLength(userDto.Password, 6, "password", &errs)
 	rules.StringMaxLength(userDto.Password, 128, "password", &errs)
 	rules.MustContainsAny(userDto.Password, "!@#$%^&*()", 1, "password", &errs)
 
-	err := user.Get([]string{"id", "email"}, "email = ?", userDto.Email)
-	if err == nil {
-		errs = append(errs, rules.ValidationError{
-			Field:   "email",
-			Message: "email must be unique",
-		})
-	}
+	rules.Unique[user_models.User](database.Auth, user_models.TABLE, "email", "email = ?", &errs, userDto.Email)
 
 	return errs
 }
@@ -33,7 +27,14 @@ func CreateUser(userDto user_models.Credentials) (*user_models.User, []rules.Val
 		return nil, validationError
 	}
 
-	user := user_models.CreateUser(userDto)
+	user := &user_models.User{}
+
+	if err := user.Create(userDto); err != nil {
+		return nil, []rules.ValidationError{{
+			Field:   "email",
+			Message: "An error has occurred",
+		}}
+	}
 
 	return user, nil
 }

@@ -61,8 +61,8 @@ func Start() {
 	http.HandleFunc("POST /auth/login/{$}", limiterLow.RateLimit(auth_handlers.LoginHandler))
 	http.HandleFunc("POST /auth/login-totp/{$}", limiterLow.RateLimit(auth_handlers.ValidateTOTPHandler))
 	http.HandleFunc("POST /auth/register/{$}", limiterLow.RateLimit(auth_handlers.RegisterHandler))
-	http.HandleFunc("GET /auth/me/{$}", limiterLow.RateLimit(isAuth(auth_handlers.ShowMeHandler)))
 
+	http.HandleFunc("GET /user/me/{$}", limiterLow.RateLimit(isAuth(auth_handlers.ShowMeHandler)))
 	http.HandleFunc("GET /user/{$}", limiterLow.RateLimit(isAuth(user_handlers.IndexUserHandler)))
 	http.HandleFunc("GET /user/{id}/{$}", limiterLow.RateLimit(isAuth(user_handlers.ShowUserHandler)))
 	http.HandleFunc("PATCH /user/{$}", limiterLow.RateLimit(isAuth(user_handlers.UpdateUserHandler)))

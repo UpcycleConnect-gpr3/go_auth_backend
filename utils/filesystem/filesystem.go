@@ -72,3 +72,16 @@ func GetObject(bucket internal.RustFSBucket, id string) (string, error) {
 	}
 	return string(data), nil
 }
+
+func DeleteObject(bucket internal.RustFSBucket, key string) error {
+	ctx := context.TODO()
+	_, err := bucket.Client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(bucket.BucketName),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return fmt.Errorf("delete object failed: %v", err)
+	}
+	log.Info(fmt.Sprintf("File deleted from %s/%s", bucket.BucketName, key))
+	return nil
+}

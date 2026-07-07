@@ -19,7 +19,7 @@ func ValidateTOTPAndLogin(hash, totpCode string) (string, error) {
 	}
 
 	var user user_models.User
-	err = user.Get([]string{"id", "totp_secret"}, "id = ?", totpRecord.UserID)
+	err = user.Get([]string{"id", "totp_secret", "role"}, "id = ?", totpRecord.UserID)
 
 	if err != nil {
 		return "", fmt.Errorf(response.ErrUserNotFound)
@@ -33,7 +33,7 @@ func ValidateTOTPAndLogin(hash, totpCode string) (string, error) {
 		return "", err
 	}
 
-	token, err := jwt.GenerateJWT(totpRecord.UserID)
+	token, err := jwt.GenerateJWT(totpRecord.UserID, user.Role)
 	if err != nil {
 		return "", fmt.Errorf(response.ErrGenerateToken)
 	}

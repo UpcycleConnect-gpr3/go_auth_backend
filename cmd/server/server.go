@@ -3,6 +3,7 @@ package server
 import (
 	"authentication_backend/app/handlers/auth_handlers"
 	"authentication_backend/app/handlers/metric_handlers"
+	"authentication_backend/app/handlers/role_handlers"
 	"authentication_backend/app/handlers/totp_handlers"
 	"authentication_backend/app/handlers/user_handlers"
 	"authentication_backend/app/middleware/auth_middleware"
@@ -71,6 +72,10 @@ func Start() {
 	http.HandleFunc("POST /auth/totp/{$}", limiterLow.RateLimit(isAuth(totp_handlers.PostTOTP)))
 	http.HandleFunc("GET /auth/totp/{$}", limiterLow.RateLimit(isAuth(totp_handlers.GetTOTP)))
 
+	http.HandleFunc("GET /roles/{$}", limiterLow.RateLimit(isAuth(role_handlers.GetAllRolesHandler)))
+	http.HandleFunc("GET /roles/user-selectable/{$}", limiterLow.RateLimit(role_handlers.GetUserSelectableRolesHandler))
+	http.HandleFunc("PATCH /user/{id}/role/{$}", limiterLow.RateLimit(isAuth(auth_middleware.RequireAdmin(role_handlers.UpdateUserRoleHandler))))
+
 	logger.Info().Msg("Listening at http://localhost:" + os.Getenv("APP_PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("APP_PORT"), corsMiddleware(http.DefaultServeMux))
 	if err != nil {
@@ -86,7 +91,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 		if origin := r.Header.Get("Origin"); origin != "" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 		}

@@ -37,7 +37,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := jwt.GenerateJWT(user.Id.String())
+	token, err := jwt.GenerateJWT(user.Id.String(), user.Role)
 	if err != nil {
 		response.NewErrorMessage(w, response.ErrGenerateToken, http.StatusInternalServerError)
 		return
@@ -46,6 +46,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	response.NewSuccessData(w, map[string]interface{}{
 		"bearer_token":  token,
 		"totp_required": false,
+		"role":          user.Role,
 	})
 }
 
@@ -54,7 +55,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var userDto user_models.Credentials
+	var userDto user_models.RegisterRequest
 
 	err := json.NewDecoder(r.Body).Decode(&userDto)
 
@@ -73,13 +74,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	response.NewSuccessData(w, map[string]interface{}{
 		"user_id": user.Id,
+		"role":    user.Role,
 	})
 }
 
 func ShowMeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Api(r)
 
-	columns := []string{"id", "firstname", "lastname", "email", "totp_enabled", "created_at", "updated_at"}
+	columns := []string{"id", "firstname", "lastname", "email", "role", "totp_enabled", "created_at", "updated_at"}
 	user := auth.Auth(r).User(w, columns)
 
 	if user.Id == uuid.Nil {

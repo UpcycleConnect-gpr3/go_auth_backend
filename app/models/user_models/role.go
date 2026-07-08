@@ -12,12 +12,14 @@ const (
 
 // Rôles sélectionnables par l'utilisateur à l'inscription (frontend).
 func AllUserSelectableRoles() []Role {
-	return []Role{RoleProfessional, RoleProvider, RoleCreator}
+	// A l'inscription : Particulier ou Professionnel/Artisan. Les autres roles
+	// (creator, employee, administrator) sont attribues par un administrateur.
+	return []Role{RoleProvider, RoleProfessional}
 }
 
 // Rôles assignables uniquement par un administrateur (backoffice).
 func AllAdminAssignableRoles() []Role {
-	return []Role{RoleEmployee, RoleAdministrator}
+	return []Role{RoleCreator, RoleEmployee, RoleAdministrator}
 }
 
 func AllRoles() []Role {

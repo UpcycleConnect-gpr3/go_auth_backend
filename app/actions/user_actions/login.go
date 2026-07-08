@@ -20,7 +20,7 @@ func loginValidateCredential(userDto user_models.Credentials) ([]rules.Validatio
 	rules.StringMinLength(userDto.Password, 6, "password", &errs)
 	rules.StringMaxLength(userDto.Password, 30, "password", &errs)
 
-	err := user.Get([]string{"id", "email", "password", "totp_enabled"}, "email = ?", userDto.Email)
+	err := user.Get([]string{"id", "email", "password", "totp_enabled", "role"}, "email = ?", userDto.Email)
 	if err != nil {
 		errs = append(errs, rules.ValidationError{
 			Field:   "email",

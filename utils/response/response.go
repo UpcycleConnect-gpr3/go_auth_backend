@@ -84,6 +84,7 @@ const (
 	ErrInvalidAuthToken     = "Invalid authorization token"
 	ErrInvalidOrExpiredHash = "Invalid or expired hash"
 	ErrFetchingTOTPRecord   = "Failed to fetch TOTP record"
+	ErrForbidden            = "Forbidden: insufficient permissions"
 )
 
 const (

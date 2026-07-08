@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"authentication_backend/app/models/user_models"
 	"authentication_backend/utils/log"
 	"authentication_backend/utils/response"
 	"crypto/rsa"
@@ -60,10 +61,11 @@ func init() {
 	}
 }
 
-func GenerateJWT(userId string) (string, error) {
+func GenerateJWT(userId string, role user_models.Role) (string, error) {
 
 	claims := jwt.MapClaims{
 		"userId": userId,
+		"role":   string(role),
 		"exp":    time.Now().Add(time.Hour).Unix(),
 		"iat":    time.Now().Unix(),
 	}
@@ -72,7 +74,7 @@ func GenerateJWT(userId string) (string, error) {
 	return token.SignedString(PrivateKey)
 }
 
-func VerifyJWT(tokenString string) (string, error) {
+func VerifyJWT(tokenString string) (string, user_models.Role, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -80,33 +82,38 @@ func VerifyJWT(tokenString string) (string, error) {
 		return PublicKey, nil
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to parse token: %w", err)
+		return "", "", fmt.Errorf("failed to parse token: %w", err)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return "", fmt.Errorf("invalid token claims or not valid")
+		return "", "", fmt.Errorf("invalid token claims or not valid")
 	}
 
 	userId, ok := claims["userId"].(string)
 	if !ok {
-		return "", fmt.Errorf("userId not found in token")
+		return "", "", fmt.Errorf("userId not found in token")
 	}
-	return userId, nil
+
+	// Tokens émis avant l'ajout des rôles : claim absent → rôle vide,
+	// seules les routes protégées par rôle refusent (reconnexion requise).
+	role, _ := claims["role"].(string)
+
+	return userId, user_models.Role(role), nil
 }
 
-func Auth(w http.ResponseWriter, r *http.Request) string {
+func Auth(w http.ResponseWriter, r *http.Request) (string, user_models.Role) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		response.NewErrorMessage(w, response.ErrAuthTokenRequired, http.StatusUnauthorized)
-		return ""
+		return "", ""
 	}
 
-	userId, err := VerifyJWT(tokenString)
+	userId, role, err := VerifyJWT(tokenString)
 	if err != nil {
 		response.NewErrorMessage(w, response.ErrInvalidAuthToken, http.StatusUnauthorized)
-		return ""
+		return "", ""
 	}
 
-	return userId
+	return userId, role
 }

@@ -18,6 +18,7 @@ type User struct {
 	Lastname    *string   `db:"lastname" json:"lastname,omitempty"`
 	Password    *string   `db:"password" json:"-"`
 	Email       *string   `db:"email" json:"email"`
+	Role        Role      `db:"role" json:"role"`
 	TOTPSecret  string    `db:"totp_secret" json:"-"`
 	TOTPEnabled bool      `db:"totp_enabled" json:"totp_enabled"`
 	CreatedAt   *string   `db:"created_at" json:"created_at,omitempty"`
@@ -29,6 +30,14 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
+type RegisterRequest struct {
+	Credentials
+	Role Role `json:"role"`
+}
+
+// Le rôle est volontairement absent d'UpdateUserRequest : il ne se change
+// que via PATCH /user/{id}/role/ (administrateur). Champ non-pointeur dans
+// User → ignoré par db.UpdateQuery (qui n'écrit que les pointeurs non nil).
 type UpdateUserRequest struct {
 	Firstname *string `json:"firstname,omitempty"`
 	Lastname  *string `json:"lastname,omitempty"`
@@ -88,15 +97,24 @@ func (user *User) Delete() error {
 	return db.DeleteQuery(database.Auth, TABLE, db.IdClause, user.Id)
 }
 
-func (user *User) Create(creds Credentials) error {
+func (user *User) Create(creds Credentials, role Role) error {
 	if err := user.SetPassword(creds.Password); err != nil {
 		return err
 	}
 
 	user.Id = uuid.New()
 	user.Email = &creds.Email
-	columns := []string{"id", "email", "password"}
-	return db.CreateQuery(database.Auth, TABLE, columns, user.Id.String(), user.Email, *user.Password)
+	user.Role = role
+	columns := []string{"id", "email", "password", "role"}
+	return db.CreateQuery(database.Auth, TABLE, columns, user.Id.String(), user.Email, *user.Password, user.Role)
+}
+
+func UpdateUserRole(userId string, role Role) error {
+	_, err := database.Auth.Exec(
+		"UPDATE "+TABLE+" SET role = ? WHERE id = ?",
+		role, userId,
+	)
+	return err
 }
 
 func UpdateUserTOTP(user *User) error {

@@ -7,7 +7,6 @@ import (
 	"net/http"
 )
 
-// RequireRoles n'autorise l'accès qu'aux rôles listés (lus depuis le JWT).
 func RequireRoles(requiredRoles ...user_models.Role) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {

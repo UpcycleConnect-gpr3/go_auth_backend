@@ -33,8 +33,6 @@ func createValidateUser(userDto user_models.RegisterRequest) []rules.ValidationE
 
 func CreateUser(userDto user_models.RegisterRequest) (*user_models.User, []rules.ValidationError) {
 
-	// Rétrocompatibilité : les clients qui n'envoient pas encore de rôle
-	// obtiennent le rôle par défaut plutôt qu'une erreur de validation.
 	if userDto.Role == "" {
 		userDto.Role = user_models.RoleProfessional
 	}

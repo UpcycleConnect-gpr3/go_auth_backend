@@ -30,7 +30,6 @@ func initialize() {
 		logger.Fatal().Err(err).Msg("Error loading .env file")
 	}
 
-	// Config Initialization
 	config.InitDatabase()
 	config.InitEmail()
 	config.InitFilesystem()
@@ -47,8 +46,6 @@ func Start() {
 	initialize()
 
 	limiterLow := ratelimit_middleware.NewRateLimiter(10, 1*time.Minute)
-	//limiter_medium := ratelimit_middleware.NewRateLimiter(10, 1*time.Minute)
-	//limiter_hight := ratelimit_middleware.NewRateLimiter(10, 1*time.Minute)
 
 	isAuth := auth_middleware.IsAuth
 
@@ -83,9 +80,6 @@ func Start() {
 	}
 }
 
-// corsMiddleware enables cross-origin requests from the local dev frontends
-// (Vite on a different port). Reflects the request Origin and answers the
-// preflight OPTIONS so browser login/register calls are not blocked.
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if origin := r.Header.Get("Origin"); origin != "" {

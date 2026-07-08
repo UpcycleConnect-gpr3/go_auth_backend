@@ -35,9 +35,6 @@ type RegisterRequest struct {
 	Role Role `json:"role"`
 }
 
-// Le rôle est volontairement absent d'UpdateUserRequest : il ne se change
-// que via PATCH /user/{id}/role/ (administrateur). Champ non-pointeur dans
-// User → ignoré par db.UpdateQuery (qui n'écrit que les pointeurs non nil).
 type UpdateUserRequest struct {
 	Firstname *string `json:"firstname,omitempty"`
 	Lastname  *string `json:"lastname,omitempty"`

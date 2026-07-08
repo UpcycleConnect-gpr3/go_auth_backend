@@ -5,9 +5,6 @@ import (
 	"authentication_backend/utils/rules"
 )
 
-// UpdateUserRole change le rôle d'un utilisateur. Le middleware RequireAdmin
-// filtre déjà sur le JWT ; on revérifie ici en base (source de vérité, un
-// token d'une heure peut porter un rôle révoqué entre-temps).
 func UpdateUserRole(adminId string, targetUserId string, newRole user_models.Role) []rules.ValidationError {
 	var errs []rules.ValidationError
 

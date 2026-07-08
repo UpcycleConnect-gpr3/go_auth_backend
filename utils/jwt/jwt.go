@@ -95,8 +95,6 @@ func VerifyJWT(tokenString string) (string, user_models.Role, error) {
 		return "", "", fmt.Errorf("userId not found in token")
 	}
 
-	// Tokens émis avant l'ajout des rôles : claim absent → rôle vide,
-	// seules les routes protégées par rôle refusent (reconnexion requise).
 	role, _ := claims["role"].(string)
 
 	return userId, user_models.Role(role), nil
